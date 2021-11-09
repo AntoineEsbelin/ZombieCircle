@@ -17,6 +17,11 @@ int main()
 	window.setVerticalSyncEnabled(true);
 	window.setFramerateLimit(60);
 
+	float xwindow = window.getSize().x;
+	float ywindow = window.getSize().y;
+	
+
+
 	// Player
 
 	CircleShape player;
@@ -88,7 +93,7 @@ int main()
 			player.move(0.f, 5.f);
 
 		//Tir du joueur 
-		if (Mouse::isButtonPressed(Mouse::Left)) {
+		if (Mouse::isButtonPressed(Mouse::Left) ) {
 			b1.shape.setPosition(playerCenter);
 			b1.currVelocity = aimDirNorm * b1.maxSpeed;
 
@@ -111,6 +116,19 @@ int main()
 				bullets.erase(bullets.begin() + i);
 			}
 		}
+		//col screen
+		// Left col
+		if (player.getPosition().x < 0.f)
+			player.setPosition(0.f, player.getPosition().y);
+		//Top col
+		if (player.getPosition().y < 0.f)
+			player.setPosition(player.getPosition().x, 0.f);
+		//Right col
+		if (player.getPosition().x + player.getGlobalBounds().width > xwindow)
+			player.setPosition(xwindow - player.getGlobalBounds().width, player.getPosition().y);
+		//Bottom col
+		if (player.getPosition().y + player.getGlobalBounds().height > ywindow)
+			player.setPosition(player.getPosition().x, ywindow - player.getGlobalBounds().height);
 
 		window.display();
 	}
