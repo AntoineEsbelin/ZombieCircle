@@ -1,5 +1,4 @@
 #pragma once
-
 //void RectMovement(sf::RectangleShape& rect, float deltaTime);
 
 using namespace sf;
@@ -17,3 +16,27 @@ public:
 		this->shape.setFillColor(Color::Red);
 	}
 };
+
+struct Enemy
+{
+	bool isDead = false;
+	CircleShape enemyCircleShape;
+	float rusherSpeed = rand() % 4 + 1;
+};
+
+Enemy SpawnEnemyRusher()
+{
+	Enemy enemy;
+	int enemyStartPosX = rand() % 1100;
+	int enemyStartPosY = rand() % 1100;
+	enemy.enemyCircleShape.setRadius(15.f);
+	enemy.enemyCircleShape.setFillColor(Color::Green);
+	enemy.enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
+	std::cout << enemyStartPosX << " " << enemyStartPosY << std::endl;
+	return enemy;
+}
+
+//void enemyMove(CircleShape enemy, CircleShape player)
+//{
+//	
+//}
