@@ -9,10 +9,14 @@
 #include <time.h>
 
 
+
+float PI = 3.14159265359f;
+
 int main()
 {
-	// Fenêtre
-	RenderWindow window(VideoMode(1100, 1100), "Ma première fenêtre");
+	srand(time(NULL));
+	// Fenï¿½tre
+	RenderWindow window(VideoMode(1100, 1100), "Ma premiï¿½re fenï¿½tre");
 	window.setVerticalSyncEnabled(true);
 	window.setFramerateLimit(60);
 
@@ -37,6 +41,10 @@ int main()
 
 	// Cooldown
 	bool canAttack = true;
+
+	// Enemies
+	Enemy enemy[3] = { SpawnEnemyRusher() , SpawnEnemyRusher() , SpawnEnemyRusher() };
+
 
 	// Background
 
@@ -69,11 +77,36 @@ int main()
 
 		// Logique
 
-		Time elapsedTime = clock.restart(); //< Calcul du temps écoulé depuis la dernière boucle
+		Time elapsedTime = clock.restart(); //< Calcul du temps ï¿½coulï¿½ depuis la derniï¿½re boucle
 		
-		// Mise à jour 
+		// Mise ï¿½ jour 
 		// Vecteurs
 		playerCenter = Vector2f(player.getPosition().x + player.getRadius(), player.getPosition().y + player.getRadius());
+		//enemyMove(enemy, player);
+		for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
+		{
+			if (!enemy[i].isDead)
+			{
+				if ((enemy[i].enemyCircleShape.getPosition().x > player.getPosition().x))
+				{
+					enemy[i].enemyCircleShape.move(-enemy[i].rusherSpeed, 0.f);
+				}
+				if ((enemy[i].enemyCircleShape.getPosition().y > player.getPosition().y))
+				{
+					enemy[i].enemyCircleShape.move(0.f, -enemy[i].rusherSpeed);
+				}
+				if ((enemy[i].enemyCircleShape.getPosition().x < player.getPosition().x))
+				{
+					enemy[i].enemyCircleShape.move(enemy[i].rusherSpeed, 0.f);
+				}
+				if ((enemy[i].enemyCircleShape.getPosition().y < player.getPosition().y))
+				{
+					enemy[i].enemyCircleShape.move(0.f, enemy[i].rusherSpeed);
+				}
+			}
+		}
+		
+
 		mousePosWindow = Vector2f(Mouse::getPosition(window));
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
@@ -81,7 +114,7 @@ int main()
 		//cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
 		
 
-		//Déplacement du joueur 
+		//Dï¿½placement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q))
 			player.move(-5.f, 0.f);
 		if (Keyboard::isKeyPressed(Keyboard::D))
@@ -107,17 +140,33 @@ int main()
 
 		window.draw(bg);
 		window.draw(player);
+		for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
+		{
+			window.draw(enemy[i].enemyCircleShape);
+		}
 
 		// Tir des projectiles 
-		for (size_t i = 0; i < bullets.size(); i++) {
-			window.draw(bullets[i].shape);
-			bullets[i].shape.move(bullets[i].currVelocity);
+
+		
+			for (size_t i = 0; i < bullets.size(); i++) {
+				window.draw(bullets[i].shape);
+				bullets[i].shape.move(bullets[i].currVelocity);
 			
 			if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 				bullets.erase(bullets.begin() + i);
 				canAttack = true;
+				if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
+					bullets.erase(bullets.begin() + i);
+				}
+				for (int j = 0; j < sizeof(enemy) / sizeof(*enemy); j++)
+				{
+					if ((bullets[i].shape.getPosition().x < enemy[j].enemyCircleShape.getPosition().x + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < enemy[j].enemyCircleShape.getPosition().y + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > enemy[j].enemyCircleShape.getPosition().x - enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > enemy[j].enemyCircleShape.getPosition().y - enemy[j].enemyCircleShape.getRadius()))
+					{
+						enemy[j].enemyCircleShape.setFillColor(Color::White);
+						enemy[j].isDead = true;
+					}
+				}
 			}
-		}
 		//col screen
 		// Left col
 		if (player.getPosition().x < 0.f)
