@@ -37,8 +37,3 @@ Enemy SpawnEnemyRusher()
 	std::cout << enemyStartPosX << " " << enemyStartPosY << std::endl;
 	return enemy;
 }
-
-//void enemyMove(CircleShape enemy, CircleShape player)
-//{
-//	
-//}
