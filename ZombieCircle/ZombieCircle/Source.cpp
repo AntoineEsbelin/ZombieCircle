@@ -6,8 +6,7 @@
 #include "windows.h"
 #include "Header.h"
 #include <vector>
-
-
+#include <time.h>
 
 
 int main()
@@ -19,8 +18,6 @@ int main()
 
 	float xwindow = window.getSize().x;
 	float ywindow = window.getSize().y;
-	
-
 
 	// Player
 
@@ -38,9 +35,8 @@ int main()
 	
 	vector<Bullet> bullets;
 
-
-	// Enemies
-
+	// Cooldown
+	bool canAttack = true;
 
 	// Background
 
@@ -52,7 +48,7 @@ int main()
 
 
 	Clock clock;
-
+	
 	while (window.isOpen())
 	{
 		// Inputs
@@ -67,12 +63,14 @@ int main()
 
 			default:
 				break;
+				
 			}
 		}
 
 		// Logique
-		Time elapsedTime = clock.restart(); //< Calcul du temps écoulé depuis la dernière boucle
 
+		Time elapsedTime = clock.restart(); //< Calcul du temps écoulé depuis la dernière boucle
+		
 		// Mise à jour 
 		// Vecteurs
 		playerCenter = Vector2f(player.getPosition().x + player.getRadius(), player.getPosition().y + player.getRadius());
@@ -80,7 +78,8 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 
-		cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
+		//cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
+		
 
 		//Déplacement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q))
@@ -93,11 +92,13 @@ int main()
 			player.move(0.f, 5.f);
 
 		//Tir du joueur 
-		if (Mouse::isButtonPressed(Mouse::Left) ) {
+		if (Mouse::isButtonPressed(Mouse::Left) && canAttack) {
 			b1.shape.setPosition(playerCenter);
 			b1.currVelocity = aimDirNorm * b1.maxSpeed;
 
 			bullets.push_back(Bullet(b1));
+			canAttack = false;
+
 		}
 
 		// Rendu
@@ -114,6 +115,7 @@ int main()
 			
 			if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 				bullets.erase(bullets.begin() + i);
+				canAttack = true;
 			}
 		}
 		//col screen
@@ -133,3 +135,4 @@ int main()
 		window.display();
 	}
 }
+
