@@ -1,6 +1,8 @@
 #pragma once
 //void RectMovement(sf::RectangleShape& rect, float deltaTime);
 
+//void RectMovement(sf::RectangleShape& rect, float deltaTime);
+
 using namespace sf;
 using namespace std;
 

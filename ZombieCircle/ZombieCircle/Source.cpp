@@ -17,11 +17,21 @@ int main()
 	srand(time(NULL));
 	// Fen�tre
 	RenderWindow window(VideoMode(1100, 1100), "Ma premi�re fen�tre");
+
+
+
+
+int main()
+{
+	// Fen�tre
+	RenderWindow window(VideoMode(1100, 1100), "Ma premi�re fen�tre");
 	window.setVerticalSyncEnabled(true);
 	window.setFramerateLimit(60);
 
 	float xwindow = window.getSize().x;
 	float ywindow = window.getSize().y;
+
+
 
 	// Player
 
@@ -45,6 +55,11 @@ int main()
 	// Enemies
 	Enemy enemy[3] = { SpawnEnemyRusher() , SpawnEnemyRusher() , SpawnEnemyRusher() };
 
+	vector<Bullet> bullets;
+
+
+	// Enemies
+
 
 	// Background
 
@@ -57,6 +72,7 @@ int main()
 
 	Clock clock;
 	
+
 	while (window.isOpen())
 	{
 		// Inputs
@@ -107,12 +123,20 @@ int main()
 		}
 		
 
+		Time elapsedTime = clock.restart(); //< Calcul du temps �coul� depuis la derni�re boucle
+
+		// Mise � jour 
+		// Vecteurs
+		playerCenter = Vector2f(player.getPosition().x + player.getRadius(), player.getPosition().y + player.getRadius());
 		mousePosWindow = Vector2f(Mouse::getPosition(window));
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 
 		//cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
 		
+
+		//D�placement du joueur 
+		cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
 
 		//D�placement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q))
@@ -126,6 +150,7 @@ int main()
 
 		//Tir du joueur 
 		if (Mouse::isButtonPressed(Mouse::Left) && canAttack) {
+		if (Mouse::isButtonPressed(Mouse::Left)) {
 			b1.shape.setPosition(playerCenter);
 			b1.currVelocity = aimDirNorm * b1.maxSpeed;
 
@@ -167,6 +192,16 @@ int main()
 					}
 				}
 			}
+
+		// Tir des projectiles 
+		for (size_t i = 0; i < bullets.size(); i++) {
+			window.draw(bullets[i].shape);
+			bullets[i].shape.move(bullets[i].currVelocity);
+
+			if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
+				bullets.erase(bullets.begin() + i);
+			}
+		}
 		//col screen
 		// Left col
 		if (player.getPosition().x < 0.f)
