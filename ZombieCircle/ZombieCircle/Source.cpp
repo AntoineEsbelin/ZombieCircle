@@ -33,20 +33,6 @@ int main()
 	Vector2f aimDir;
 	Vector2f aimDirNorm;
 
-	int playerLife = 3;
-	cout << "PLayer Life : " << playerLife << endl;
-
-	//Life Shape
-	Vector2f newpos (100.f, 0.f);
-	CircleShape heart;
-	vector<CircleShape> heartv;
-	heart.setRadius(50.F);
-	heart.setPointCount(3);
-	heart.setOrigin(heart.getRadius(), heart.getRadius());
-	heart.rotate(180);
-	heart.setFillColor(Color::Green);
-	heart.setPosition(100, 100);
-
 	// Projectiles
 	Bullet b1;
 	
@@ -94,7 +80,7 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 
-		/*cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";*/
+		cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
 
 		//Déplacement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q))
@@ -107,7 +93,7 @@ int main()
 			player.move(0.f, 5.f);
 
 		//Tir du joueur 
-		if (Mouse::isButtonPressed(Mouse::Left) && playerLife > 0 ) {
+		if (Mouse::isButtonPressed(Mouse::Left) ) {
 			b1.shape.setPosition(playerCenter);
 			b1.currVelocity = aimDirNorm * b1.maxSpeed;
 
@@ -120,7 +106,6 @@ int main()
 
 		window.draw(bg);
 		window.draw(player);
-		
 
 		// Tir des projectiles 
 		for (size_t i = 0; i < bullets.size(); i++) {
@@ -130,31 +115,6 @@ int main()
 			if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 				bullets.erase(bullets.begin() + i);
 			}
-		}
-
-		//Life Bar
-		for (size_t i = 0; i < 3; i++)
-		{
-			heartv.push_back(heart);
-			if (i > 0)
-			{
-				heart.setPosition(heart.getPosition() + newpos, heart.getPosition());
-			}
-			
-			window.draw(heart);
-		}
-
-		//Player Dead
-		if (Keyboard::isKeyPressed(Keyboard::Key::K))
-		{
-			playerLife -= 1;
-			cout << "PLayer Life : " << playerLife << endl;
-		}
-		if (playerLife == 0)
-		{
-			player.setFillColor(Color::Transparent);
-			
-			
 		}
 		//col screen
 		// Left col
