@@ -52,8 +52,7 @@ int main()
 	bg.setFillColor(Color::Black);
 
 
-	Clock clock;
-
+	Clock clocked;
 
 	while (window.isOpen())
 	{
@@ -76,7 +75,7 @@ int main()
 
 		// Logique
 
-		Time elapsedTime = clock.restart(); //< Calcul du temps �coul� depuis la derni�re boucle
+		Time elapsedTime = clocked.restart(); //< Calcul du temps �coul� depuis la derni�re boucle
 
 		// Mise � jour 
 		// Vecteurs
@@ -84,7 +83,7 @@ int main()
 		mousePosWindow = Vector2f(Mouse::getPosition(window));
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
-		//enemyMove(enemy, player);
+		
 		for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
 		{
 			if (!enemy[i].isDead)
@@ -104,6 +103,25 @@ int main()
 				if ((enemy[i].enemyCircleShape.getPosition().y < player.getPosition().y))
 				{
 					enemy[i].enemyCircleShape.move(0.f, enemy[i].rusherSpeed);
+				}
+				enemy[i].timeOfDeath = clock() / CLOCKS_PER_SEC;
+			}
+			else
+			{
+				//quand mort s'il peut revivre, attend son cooldown avant de revivre
+				if (enemy[i].isReviving < enemy[i].respawnPourcentage)
+				{
+					if (enemy[i].reviveTime < enemy[i].timeOfDeath + enemy[i].timeBeforeRevive)
+					{
+						enemy[i].reviveTime = clock() / CLOCKS_PER_SEC;
+					}
+					else
+					{
+						std::cout << "Enemy " << i << " is reviving : " << enemy[i].isReviving << std::endl;
+						enemy[i].isDead = false;
+						enemy[i].isReviving = rand() % 100;
+						std::cout << "Enemy " << i << " is reviving : " << enemy[i].isReviving << std::endl;
+					}
 				}
 			}
 		}
@@ -138,12 +156,15 @@ int main()
 		}
 			window.clear();
 
-
 			window.draw(bg);
 			window.draw(player);
+			//Affiche les ennemis s'ils sont pas morts
 			for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
 			{
-				window.draw(enemy[i].enemyCircleShape);
+				if (!enemy[i].isDead || (enemy[i].isReviving < enemy[i].respawnPourcentage))
+				{
+					window.draw(enemy[i].enemyCircleShape);
+				}
 			}
 			// Tir des projectiles 
 			for (size_t i = 0; i < bullets.size(); i++) {
