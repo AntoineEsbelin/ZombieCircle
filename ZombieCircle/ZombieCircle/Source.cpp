@@ -8,6 +8,9 @@
 #include <vector>
 #include <time.h>
 
+
+
+
 int main()
 {
 	srand(time(NULL));
@@ -19,7 +22,7 @@ int main()
 	float xwindow = window.getSize().x;
 	float ywindow = window.getSize().y;
 
-
+	
 
 	// Player
 
@@ -34,8 +37,26 @@ int main()
 
 	// Projectiles
 	Bullet b1;
+	
+	
 
 	vector<Bullet> bullets;
+
+	//Munition
+	int maxammo = 25;
+	int currentammo = maxammo;
+	float reloadtime = 1.f;
+	cout << "Ammo : " << currentammo << endl;
+	//Affichage Munition
+	Text currentammotext;
+	string ammostri = to_string(currentammo);
+	currentammotext.setString(ammostri);
+	currentammotext.setFillColor(Color::White);
+	currentammotext.setPosition(/*xwindow - 100*/player.getPosition().x, /*ywindow - 100*/ player.getPosition().y);
+
+	Text maxammotext;
+	string maxammostri = to_string(maxammo);
+	maxammotext.setString(maxammostri);
 
 	// Cooldown
 	bool canAttack = true;
@@ -76,7 +97,7 @@ int main()
 
 		// Logique
 
-		Time elapsedTime = clock.restart(); //< Calcul du temps �coul� depuis la derni�re boucle
+		Time elapsedTime = clock.restart(); //< Calcul du temps ecoule depuis la derniere boucle
 
 		// Mise � jour 
 		// Vecteurs
@@ -125,22 +146,36 @@ int main()
 			player.move(0.f, 5.f);
 
 		//Tir du joueur 
-		if (Mouse::isButtonPressed(Mouse::Left) && canAttack  ) {
+		if (Mouse::isButtonPressed(Mouse::Left) && canAttack && currentammo > 0 ) {
 			if (Mouse::isButtonPressed(Mouse::Left)) {
 				b1.shape.setPosition(playerCenter);
 				b1.currVelocity = aimDirNorm * b1.maxSpeed;
 
 				bullets.push_back(Bullet(b1));
+				currentammo--;
 				canAttack = false;
+				cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
 
 			}
+			
+		}
+
+		//Munition
+		if (Keyboard::isKeyPressed(Keyboard::Key::R) && maxammo > 0)
+		{
+			
+			Reload(currentammo, maxammo);
+			
 			
 		}
 			window.clear();
 
 
 			window.draw(bg);
+			
 			window.draw(player);
+			window.draw(currentammotext);
+			
 			for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
 			{
 				window.draw(enemy[i].enemyCircleShape);
@@ -176,5 +211,10 @@ int main()
 				player.setPosition(player.getPosition().x, ywindow - player.getGlobalBounds().height);
 		window.display();
 	}
+
+	
+	
 }
+
+
 
