@@ -44,9 +44,14 @@ int main()
 
 	//Munition
 	int maxammo = 25;
-	int currentammo = maxammo;
+	int currentammo = 10;
 	float reloadtime = 1.f;
 	cout << "Ammo : " << currentammo << endl;
+
+	bool canR = true;
+	float rCooldownMax = 150.f;
+	float rCooldown = 0.f;
+
 	//Affichage Munition
 	Text currentammotext;
 	string ammostri = to_string(currentammo);
@@ -60,6 +65,8 @@ int main()
 
 	//Cooldown
 	bool canAttack = true;
+	float attackCooldownMax = 10.f;
+	float attackCooldown = 10.f;
 	
 	// Player en vie 
 
@@ -193,12 +200,33 @@ int main()
 			
 		}
 
+		// Cooldown d'attaque ( en n'attaquant pas pendant un moment , la prochaine attaque enverra 2 bullets d'affilé ) 
+		if (attackCooldown >= attackCooldownMax) {
+			attackCooldown = 0.f;
+			canAttack = true;
+			
+		}
+		else {
+			attackCooldown += 0.5f;
+		}
+
+		// Cooldown reload
+		
+		if (rCooldown >= rCooldownMax) {
+			rCooldown = 0.f;
+			canR = true;
+			
+		}
+		else {
+			rCooldown += 0.5f;
+		}
 
 		//Munition
-		if (Keyboard::isKeyPressed(Keyboard::Key::R) && maxammo > 0)
+		if (Keyboard::isKeyPressed(Keyboard::Key::R) && maxammo > 0 && canR)
 		{
 			
 			Reload(currentammo, maxammo);
+			canR = false;
 			
 			
 		}
@@ -236,7 +264,7 @@ int main()
 				//Suppression des projectiles en dehors de l'écran 
 				if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 					bullets.erase(bullets.begin() + i);
-					canAttack = true;
+					
 				}
 			}
 
