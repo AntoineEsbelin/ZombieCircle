@@ -156,6 +156,7 @@ int main()
 						enemy[i].isReviving = rand() % 100;
 						enemy[i].enemyCircleShape.setFillColor(Color::Green);
 					}
+					
 				}
 			}
 		}
@@ -229,6 +230,7 @@ int main()
 					{
 						enemy[j].enemyCircleShape.setFillColor(Color::White);
 						enemy[j].isDead = true;
+						
 					}
 				}
 				//Suppression des projectiles en dehors de l'écran 
@@ -251,6 +253,10 @@ int main()
 			if (player.getPosition().y + player.getGlobalBounds().height > ywindow)
 				player.setPosition(player.getPosition().x, ywindow - player.getGlobalBounds().height);
 		window.display();
+
+		// Esc pour quitter le jeu 
+		if (Keyboard::isKeyPressed(Keyboard::Key::Escape))
+			window.close();
 	}
 
 	
