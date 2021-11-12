@@ -7,7 +7,6 @@
 #include "Header.h"
 #include <vector>
 #include <time.h>
-
 int main()
 {
 	srand(time(NULL));
@@ -41,7 +40,7 @@ int main()
 	bool canAttack = true;
 
 	// Enemies
-	Enemy enemy[3] = { SpawnEnemyRusher() , SpawnEnemyRusher() , SpawnEnemyRusher() };
+	std::vector<Enemy> enemy = SpawnEnemyRusher(5);
 
 	// Background
 
@@ -84,10 +83,12 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 		
-		for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
+		//boucle pour chaque ennemies
+		for (int i = 0; i < enemy.size(); i++)
 		{
 			if (!enemy[i].isDead)
 			{
+				//mouvements des ennemies
 				if ((enemy[i].enemyCircleShape.getPosition().x > player.getPosition().x))
 				{
 					enemy[i].enemyCircleShape.move(-enemy[i].rusherSpeed, 0.f);
@@ -117,10 +118,9 @@ int main()
 					}
 					else
 					{
-						std::cout << "Enemy " << i << " is reviving : " << enemy[i].isReviving << std::endl;
 						enemy[i].isDead = false;
 						enemy[i].isReviving = rand() % 100;
-						std::cout << "Enemy " << i << " is reviving : " << enemy[i].isReviving << std::endl;
+						enemy[i].enemyCircleShape.setFillColor(Color::Green);
 					}
 				}
 			}
@@ -159,7 +159,7 @@ int main()
 			window.draw(bg);
 			window.draw(player);
 			//Affiche les ennemis s'ils sont pas morts
-			for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
+			for (int i = 0; i < enemy.size(); i++)
 			{
 				if (!enemy[i].isDead || (enemy[i].isReviving < enemy[i].respawnPourcentage))
 				{
@@ -171,7 +171,7 @@ int main()
 				window.draw(bullets[i].shape);
 				bullets[i].shape.move(bullets[i].currVelocity);
 
-				for (int j = 0; j < sizeof(enemy) / sizeof(*enemy); j++)
+				for (int j = 0; j < enemy.size(); j++)
 				{
 					if ((bullets[i].shape.getPosition().x < enemy[j].enemyCircleShape.getPosition().x + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < enemy[j].enemyCircleShape.getPosition().y + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > enemy[j].enemyCircleShape.getPosition().x - enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > enemy[j].enemyCircleShape.getPosition().y - enemy[j].enemyCircleShape.getRadius()))
 					{

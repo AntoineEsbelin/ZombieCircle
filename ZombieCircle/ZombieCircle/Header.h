@@ -32,14 +32,16 @@ struct Enemy
 	int respawnPourcentage = 75;
 };
 
-Enemy SpawnEnemyRusher()
+std::vector<Enemy> SpawnEnemyRusher(int number)
 {
-	Enemy enemy;
-	int enemyStartPosX = rand() % 1100;
-	int enemyStartPosY = rand() % 1100;
-	enemy.enemyCircleShape.setRadius(15.f);
-	enemy.enemyCircleShape.setFillColor(Color::Green);
-	enemy.enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
-	std::cout << enemyStartPosX << " " << enemyStartPosY << std::endl;
-	return enemy;
+	std::vector<Enemy> rusher(number);
+	for(int i = 0; i < rusher.size(); i++)
+	{
+		int enemyStartPosX = rand() % 1100;
+		int enemyStartPosY = rand() % 1100;
+		rusher[i].enemyCircleShape.setRadius(15.f);
+		rusher[i].enemyCircleShape.setFillColor(Color::Green);
+		rusher[i].enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
+	}
+	return rusher;
 }
