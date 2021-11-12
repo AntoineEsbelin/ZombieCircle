@@ -3,10 +3,12 @@
 
 //void RectMovement(sf::RectangleShape& rect, float deltaTime);
 
-void Reload(int &currentammo, int &maxammo);
+
 
 using namespace sf;
 using namespace std;
+
+void Reload(int& currentammo, int& maxammo);
 
 class Bullet {
 public:
@@ -31,7 +33,7 @@ struct Enemy
 	float timeBeforeRevive = 2.f;
 	float reviveTime = 0.f;
 	int isReviving = rand() % 100;
-	int respawnPourcentage = 75;
+	int respawnPourcentage = 50;
 };
 
 std::vector<Enemy> SpawnEnemyRusher(int number)
@@ -48,21 +50,4 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 	return rusher;
 }
 
-void Reload(int &currentammo, int &maxammo)
-{
-	cout << "Reloading.." << endl;
-	if (maxammo < 0)
-	{
-		maxammo = 0;
-	}
-	if (currentammo < 0)
-	{
-		currentammo = 0;
-	}
-	currentammo += (maxammo - 5);
-	maxammo -= 5;
-	
-	cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
-	
-	
-}
+

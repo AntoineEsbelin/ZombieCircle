@@ -15,7 +15,7 @@ int main()
 {
 	srand(time(NULL));
 	// Fen�tre
-	RenderWindow window(VideoMode(1100, 1100), "Ma premi�re fen�tre");
+	RenderWindow window(VideoMode(1100, 1100), "ZombieCircle");
 	window.setVerticalSyncEnabled(true);
 	window.setFramerateLimit(60);
 
@@ -58,8 +58,12 @@ int main()
 	string maxammostri = to_string(maxammo);
 	maxammotext.setString(maxammostri);
 
-	// Cooldown
+	//Cooldown
 	bool canAttack = true;
+	
+	// Player en vie 
+
+	bool isAlive = true;
 
 	// Enemies
 	std::vector<Enemy> enemy = SpawnEnemyRusher(5);
@@ -74,6 +78,8 @@ int main()
 
 
 	Clock clocked;
+
+	
 
 	while (window.isOpen())
 	{
@@ -105,12 +111,12 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 		
-		//boucle pour chaque ennemies
+		//boucle pour chaque ennemis
 		for (int i = 0; i < enemy.size(); i++)
 		{
 			if (!enemy[i].isDead)
 			{
-				//mouvements des ennemies
+				//mouvements des ennemis
 				if ((enemy[i].enemyCircleShape.getPosition().x > player.getPosition().x))
 				{
 					enemy[i].enemyCircleShape.move(-enemy[i].rusherSpeed, 0.f);
@@ -127,6 +133,12 @@ int main()
 				{
 					enemy[i].enemyCircleShape.move(0.f, enemy[i].rusherSpeed);
 				}
+
+				// Mort du joueur en contact d'un ennemi 
+				if ((player.getPosition().x < enemy[i].enemyCircleShape.getPosition().x + enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < enemy[i].enemyCircleShape.getPosition().y + enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > enemy[i].enemyCircleShape.getPosition().x - enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > enemy[i].enemyCircleShape.getPosition().y - enemy[i].enemyCircleShape.getRadius()))
+					isAlive = false;
+				
+
 				enemy[i].timeOfDeath = clock() / CLOCKS_PER_SEC;
 			}
 			else
@@ -136,7 +148,7 @@ int main()
 				{
 					if (enemy[i].reviveTime < enemy[i].timeOfDeath + enemy[i].timeBeforeRevive)
 					{
-						enemy[i].reviveTime = clock() / CLOCKS_PER_SEC;
+						enemy[i].reviveTime = clock() / CLOCKS_PER_SEC;						
 					}
 					else
 					{
@@ -148,36 +160,38 @@ int main()
 			}
 		}
 
-		//cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
-
-
 		//D�placement du joueur 
-		//cout << aimDirNorm.x << " " << aimDirNorm.y << "\n";
-
-		//D�placement du joueur 
-		if (Keyboard::isKeyPressed(Keyboard::Q))
+		if (Keyboard::isKeyPressed(Keyboard::Q) && isAlive == true)
 			player.move(-5.f, 0.f);
-		if (Keyboard::isKeyPressed(Keyboard::D))
+		if (Keyboard::isKeyPressed(Keyboard::D) && isAlive == true)
 			player.move(5.f, 0.f);
-		if (Keyboard::isKeyPressed(Keyboard::Z))
+		if (Keyboard::isKeyPressed(Keyboard::Z) && isAlive == true)
 			player.move(0.f, -5.f);
-		if (Keyboard::isKeyPressed(Keyboard::S))
+		if (Keyboard::isKeyPressed(Keyboard::S) && isAlive == true)
 			player.move(0.f, 5.f);
 
+		// Mort du joueur
+
+		if (isAlive == false) {
+			player.setFillColor(Color::Transparent);
+		}
+
 		//Tir du joueur 
-		if (Mouse::isButtonPressed(Mouse::Left) && canAttack && currentammo > 0 ) {
+		if (Mouse::isButtonPressed(Mouse::Left) && canAttack && currentammo > 0 && isAlive) {
 			if (Mouse::isButtonPressed(Mouse::Left)) {
 				b1.shape.setPosition(playerCenter);
 				b1.currVelocity = aimDirNorm * b1.maxSpeed;
 
 				bullets.push_back(Bullet(b1));
 				currentammo--;
+			
 				canAttack = false;
 				cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
 
 			}
 			
 		}
+
 
 		//Munition
 		if (Keyboard::isKeyPressed(Keyboard::Key::R) && maxammo > 0)
@@ -208,6 +222,7 @@ int main()
 				window.draw(bullets[i].shape);
 				bullets[i].shape.move(bullets[i].currVelocity);
 
+				// Mort des ennemis 
 				for (int j = 0; j < enemy.size(); j++)
 				{
 					if ((bullets[i].shape.getPosition().x < enemy[j].enemyCircleShape.getPosition().x + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < enemy[j].enemyCircleShape.getPosition().y + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > enemy[j].enemyCircleShape.getPosition().x - enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > enemy[j].enemyCircleShape.getPosition().y - enemy[j].enemyCircleShape.getRadius()))
@@ -216,20 +231,23 @@ int main()
 						enemy[j].isDead = true;
 					}
 				}
+				//Suppression des projectiles en dehors de l'écran 
 				if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 					bullets.erase(bullets.begin() + i);
 					canAttack = true;
 				}
 			}
+
+			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
 				player.setPosition(0.f, player.getPosition().y);
-			//Top col
+			
 			if (player.getPosition().y < 0.f)
 				player.setPosition(player.getPosition().x, 0.f);
-			//Right col
+			
 			if (player.getPosition().x + player.getGlobalBounds().width > xwindow)
 				player.setPosition(xwindow - player.getGlobalBounds().width, player.getPosition().y);
-			//Bottom col
+			
 			if (player.getPosition().y + player.getGlobalBounds().height > ywindow)
 				player.setPosition(player.getPosition().x, ywindow - player.getGlobalBounds().height);
 		window.display();
@@ -237,6 +255,25 @@ int main()
 
 	
 	
+}
+
+void Reload(int& currentammo, int& maxammo)
+{
+	cout << "Reloading.." << endl;
+	if (maxammo < 0)
+	{
+		maxammo = 0;
+	}
+	if (currentammo < 0)
+	{
+		currentammo = 0;
+	}
+	currentammo += 5;
+	maxammo -= 5;
+
+	cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
+
+
 }
 
 
