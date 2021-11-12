@@ -3,6 +3,8 @@
 
 //void RectMovement(sf::RectangleShape& rect, float deltaTime);
 
+void Reload(int &currentammo, int &maxammo);
+
 using namespace sf;
 using namespace std;
 
@@ -44,4 +46,23 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 		rusher[i].enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
 	}
 	return rusher;
+}
+
+void Reload(int &currentammo, int &maxammo)
+{
+	cout << "Reloading.." << endl;
+	if (maxammo < 0)
+	{
+		maxammo = 0;
+	}
+	if (currentammo < 0)
+	{
+		currentammo = 0;
+	}
+	currentammo += (maxammo - 5);
+	maxammo -= 5;
+	
+	cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
+	
+	
 }
