@@ -96,7 +96,7 @@ int main()
 
 		// Logique
 
-		Time elapsedTime = clock.restart(); //< Calcul du temps ecoule depuis la derniere boucle
+		Time elapsedTime = clocked.restart(); //< Calcul du temps ecoule depuis la derniere boucle
 
 		// Mise � jour 
 		// Vecteurs
@@ -192,11 +192,11 @@ int main()
 			window.draw(bg);
 			
 			window.draw(player);
-			//Affiche les ennemis s'ils sont pas morts
-			for (int i = 0; i < enemy.size(); i++)
 			window.draw(currentammotext);
 			
-			for (int i = 0; i < sizeof(enemy) / sizeof(*enemy); i++)
+			
+			//Affiche les ennemis s'ils sont pas morts
+			for (int i = 0; i < enemy.size(); i++)
 			{
 				if (!enemy[i].isDead || (enemy[i].isReviving < enemy[i].respawnPourcentage))
 				{
