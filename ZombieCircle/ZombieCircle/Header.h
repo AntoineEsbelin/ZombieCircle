@@ -1,4 +1,5 @@
 #pragma once
+
 //void RectMovement(sf::RectangleShape& rect, float deltaTime);
 
 //void RectMovement(sf::RectangleShape& rect, float deltaTime);
@@ -50,4 +51,67 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 	return rusher;
 }
 
+void RusherParameters(Enemy& rusher, CircleShape &player, RenderWindow &window)
+{
+	if (!rusher.isDead)
+	{
+		//mouvements des ennemis
+		if ((rusher.enemyCircleShape.getPosition().x > player.getPosition().x))
+		{
+			rusher.enemyCircleShape.move(-rusher.rusherSpeed, 0.f);
+		}
+		if ((rusher.enemyCircleShape.getPosition().y > player.getPosition().y))
+		{
+			rusher.enemyCircleShape.move(0.f, -rusher.rusherSpeed);
+		}
+		if ((rusher.enemyCircleShape.getPosition().x < player.getPosition().x))
+		{
+			rusher.enemyCircleShape.move(rusher.rusherSpeed, 0.f);
+		}
+		if ((rusher.enemyCircleShape.getPosition().y < player.getPosition().y))
+		{
+			rusher.enemyCircleShape.move(0.f, rusher.rusherSpeed);
+		}
 
+		rusher.timeOfDeath = clock() / CLOCKS_PER_SEC;
+	}
+	else
+	{
+		//quand mort s'il peut revivre, attend son cooldown avant de revivre
+		if (rusher.isReviving < rusher.respawnPourcentage)
+		{
+			if (rusher.reviveTime < rusher.timeOfDeath + rusher.timeBeforeRevive)
+			{
+				rusher.reviveTime = clock() / CLOCKS_PER_SEC;
+			}
+			else
+			{
+				rusher.isDead = false;
+				rusher.isReviving = rand() % 100;
+				rusher.enemyCircleShape.setFillColor(Color::Green);
+			}
+
+		}
+	}
+
+	
+}
+
+void Reload(int& currentammo, int& maxammo)
+{
+	cout << "Reloading.." << endl;
+	if (maxammo < 0)
+	{
+		maxammo = 0;
+	}
+	if (currentammo < 0)
+	{
+		currentammo = 0;
+	}
+	currentammo += 5;
+	maxammo -= 5;
+
+	cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
+
+
+}
