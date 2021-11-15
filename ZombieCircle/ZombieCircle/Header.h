@@ -26,13 +26,13 @@ struct Enemy
 {
 	bool isDead = false;
 	CircleShape enemyCircleShape;
-	float rusherSpeed = rand() % 4 + 1;
+	float rusherSpeed = 2; // rand() % 4 + 1;
 	float timeOfDeath = 0.f;
 	float coolDown = timeOfDeath + timeBeforeRevive;
 	float timeBeforeRevive = 2.f;
 	float reviveTime = 0.f;
 	int isReviving = rand() % 100;
-	int respawnPourcentage = 50;
+	int respawnPourcentage = 0;
 };
 
 

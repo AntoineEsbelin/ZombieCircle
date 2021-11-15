@@ -57,7 +57,7 @@ int main()
 	string ammostri = to_string(currentammo);
 	currentammotext.setString(ammostri);
 	currentammotext.setFillColor(Color::White);
-	currentammotext.setPosition(/*xwindow - 100*/player.getPosition().x, /*ywindow - 100*/ player.getPosition().y);
+	currentammotext.setPosition(player.getPosition().x,  player.getPosition().y);
 
 	Text maxammotext;
 	string maxammostri = to_string(maxammo);
@@ -72,10 +72,6 @@ int main()
 
 	bool isAlive = true;
 
-	// Enemies
-	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
-	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
-
 	// Background
 
 	RectangleShape bg(Vector2f(1100, 1100));
@@ -83,6 +79,18 @@ int main()
 	bg.setOrigin(bgRect.left + bgRect.width / 2.0f, bgRect.top + bgRect.height / 2.0f);
 	bg.setPosition(window.getView().getCenter());
 	bg.setFillColor(Color::Black);
+
+	// Levels
+
+	int completion = 0;
+	bool level1 = true;
+	bool level2 = false;
+
+	// Enemies
+	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
+	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
+
+	
 
 	Clock clocked;
 
@@ -184,33 +192,47 @@ int main()
 			
 			window.draw(player);
 			window.draw(currentammotext);
+
 			
 			//boucle pour chaque ennemis
 				//RUSHER
-			for (int i = 0; i < rusherEnemy.size(); i++)
-			{
-				//fonctions general du rusher
-				RusherParameters(rusherEnemy[i], player);
-				// Mort du joueur en contact d'un ennemi 
-				if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
+
+			if (level1 || level2) {
+				for (int i = 0; i < rusherEnemy.size(); i++)
 				{
-					if (!rusherEnemy[i].isDead)
+					//fonctions general du rusher
+					RusherParameters(rusherEnemy[i], player);
+					// Mort du joueur en contact d'un ennemi 
+					if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
 					{
-						isAlive = false;
+						if (!rusherEnemy[i].isDead)
+						{
+							isAlive = false;
+						}
+					}
+					//Affiche les ennemis s'ils sont pas morts
+					//pour les rusher
+					if (!rusherEnemy[i].isDead || (rusherEnemy[i].isReviving < rusherEnemy[i].respawnPourcentage))
+					{
+						window.draw(rusherEnemy[i].enemyCircleShape);
+					}
+					else
+					{
+						rusherEnemy.erase(rusherEnemy.begin() + i);
+						completion += 1;
+						cout << completion << "\n";
+
+						if (completion == 0) {
+							std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(5);
+							cout << "level 2" << "\n";
+							completion == 0;
+
+						}
+
 					}
 				}
-				//Affiche les ennemis s'ils sont pas morts
-				//pour les rusher
-				if (!rusherEnemy[i].isDead || (rusherEnemy[i].isReviving < rusherEnemy[i].respawnPourcentage))
-				{
-					window.draw(rusherEnemy[i].enemyCircleShape);
-				}
-				else
-				{
-					rusherEnemy.erase(rusherEnemy.begin() + i);
-				}
 			}
-
+						
 				//SHOOTER
 			for (int i = 0; i < shooterEnemy.size(); i++)
 			{
@@ -452,6 +474,11 @@ void Reload(int& currentammo, int& maxammo)
 	maxammo -= 5;
 
 	cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
+
+
+}
+
+void WavesEnemies(){
 
 
 }
