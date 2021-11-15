@@ -36,10 +36,11 @@ int main()
 
 	// Projectiles
 	Bullet b1;
-	
+	Bullet shooterB1;
 	
 
 	vector<Bullet> bullets;
+	vector<Bullet> shooterBullets;
 
 	//Munition
 	int maxammo = 25;
@@ -72,7 +73,8 @@ int main()
 	bool isAlive = true;
 
 	// Enemies
-	std::vector<Enemy> enemy = SpawnEnemyRusher(5);
+	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
+	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
 
 	// Background
 
@@ -114,55 +116,7 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 		
-		//boucle pour chaque ennemis
-		for (int i = 0; i < enemy.size(); i++)
-		{
-			if (!enemy[i].isDead)
-			{
-				//mouvements des ennemis
-				if ((enemy[i].enemyCircleShape.getPosition().x > player.getPosition().x))
-				
-					enemy[i].enemyCircleShape.move(-enemy[i].rusherSpeed, 0.f);
-				
-				if ((enemy[i].enemyCircleShape.getPosition().y > player.getPosition().y))
-				
-					enemy[i].enemyCircleShape.move(0.f, -enemy[i].rusherSpeed);
-				
-				if ((enemy[i].enemyCircleShape.getPosition().x < player.getPosition().x))
-				
-					enemy[i].enemyCircleShape.move(enemy[i].rusherSpeed, 0.f);
-				
-				if ((enemy[i].enemyCircleShape.getPosition().y < player.getPosition().y))
-				
-					enemy[i].enemyCircleShape.move(0.f, enemy[i].rusherSpeed);
-				
-
-				// Mort du joueur en contact d'un ennemi 
-				if ((player.getPosition().x < enemy[i].enemyCircleShape.getPosition().x + enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < enemy[i].enemyCircleShape.getPosition().y + enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > enemy[i].enemyCircleShape.getPosition().x - enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > enemy[i].enemyCircleShape.getPosition().y - enemy[i].enemyCircleShape.getRadius()))
-					isAlive = false;
-				
-
-				enemy[i].timeOfDeath = clock() / CLOCKS_PER_SEC;
-			}
-			else
-			{
-				//quand mort s'il peut revivre, attend son cooldown avant de revivre
-				if (enemy[i].isReviving < enemy[i].respawnPourcentage)
-				{
-					if (enemy[i].reviveTime < enemy[i].timeOfDeath + enemy[i].timeBeforeRevive)
-					
-						enemy[i].reviveTime = clock() / CLOCKS_PER_SEC;						
-					
-					else
-					{
-						enemy[i].isDead = false;
-						enemy[i].isReviving = rand() % 100;
-						enemy[i].enemyCircleShape.setFillColor(Color::Green);
-					}
-					
-				}
-			}
-		}
+		
 
 		//D�placement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q) && isAlive == true)
@@ -231,27 +185,71 @@ int main()
 			window.draw(player);
 			window.draw(currentammotext);
 			
-			
-			//Affiche les ennemis s'ils sont pas morts
-			for (int i = 0; i < enemy.size(); i++)
+			//boucle pour chaque ennemis
+				//RUSHER
+			for (int i = 0; i < rusherEnemy.size(); i++)
 			{
-				if (!enemy[i].isDead || (enemy[i].isReviving < enemy[i].respawnPourcentage))
-					window.draw(enemy[i].enemyCircleShape);
+				//fonctions general du rusher
+				RusherParameters(rusherEnemy[i], player);
+				// Mort du joueur en contact d'un ennemi 
+				if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
+				{
+					if (!rusherEnemy[i].isDead)
+					{
+						isAlive = false;
+					}
+				}
+				//Affiche les ennemis s'ils sont pas morts
+				//pour les rusher
+				if (!rusherEnemy[i].isDead || (rusherEnemy[i].isReviving < rusherEnemy[i].respawnPourcentage))
+				{
+					window.draw(rusherEnemy[i].enemyCircleShape);
+				}
+				else
+				{
+					rusherEnemy.erase(rusherEnemy.begin() + i);
+				}
 			}
 
+				//SHOOTER
+			for (int i = 0; i < shooterEnemy.size(); i++)
+			{
+
+				ShooterParameters(shooterEnemy[i], player, shooterBullets, shooterB1);
+				if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
+				{
+					window.draw(shooterEnemy[i].shooterShape);
+				}
+				else
+				{
+					shooterEnemy.erase(shooterEnemy.begin() + i);
+				}
+			}
+			
 			// Tir des projectiles 
 			for (size_t i = 0; i < bullets.size(); i++) {
 				window.draw(bullets[i].shape);
 				bullets[i].shape.move(bullets[i].currVelocity);
 
 				// Mort des ennemis 
-				for (int j = 0; j < enemy.size(); j++)
+				//RUSHER
+				for (int j = 0; j < rusherEnemy.size(); j++)
 				{
-					if ((bullets[i].shape.getPosition().x < enemy[j].enemyCircleShape.getPosition().x + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < enemy[j].enemyCircleShape.getPosition().y + enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > enemy[j].enemyCircleShape.getPosition().x - enemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > enemy[j].enemyCircleShape.getPosition().y - enemy[j].enemyCircleShape.getRadius()))
+					if ((bullets[i].shape.getPosition().x < rusherEnemy[j].enemyCircleShape.getPosition().x + rusherEnemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy[j].enemyCircleShape.getPosition().y + rusherEnemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy[j].enemyCircleShape.getPosition().x - rusherEnemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy[j].enemyCircleShape.getPosition().y - rusherEnemy[j].enemyCircleShape.getRadius()))
 					{
-						enemy[j].enemyCircleShape.setFillColor(Color::White);
-						enemy[j].isDead = true;
+						rusherEnemy[j].enemyCircleShape.setFillColor(Color::White);
+						rusherEnemy[j].isDead = true;
 						
+					}
+				}
+				//SHOOTER
+				for (int j = 0; j < shooterEnemy.size(); j++)
+				{
+					if ((bullets[i].shape.getPosition().x < shooterEnemy[j].shooterShape.getPosition().x + shooterEnemy[j].shooterShape.getRadius()) && (bullets[i].shape.getPosition().y < shooterEnemy[j].shooterShape.getPosition().y + shooterEnemy[j].shooterShape.getRadius()) && (bullets[i].shape.getPosition().x > shooterEnemy[j].shooterShape.getPosition().x - shooterEnemy[j].shooterShape.getRadius()) && (bullets[i].shape.getPosition().y > shooterEnemy[j].shooterShape.getPosition().y - shooterEnemy[j].shooterShape.getRadius()))
+					{
+						shooterEnemy[j].shooterShape.setFillColor(Color::White);
+						shooterEnemy[j].isDead = true;
+
 					}
 				}
 				//Suppression des projectiles en dehors de l'écran 
@@ -260,6 +258,42 @@ int main()
 					
 				}
 			}
+
+			//tir des shooter
+			/*for (int j = 0; j < shooterEnemy.size(); j++)
+			{
+				if (shooterEnemy[j].canShoot)
+				{
+					shooterEnemy[j].shooted = clock() / (float)CLOCKS_PER_SEC;
+					shooterB1.shape.setPosition(shooterEnemy[j].shooterShape.getPosition());
+					shooterB1.currVelocity.x = player.getPosition().x + player.getRadius();
+					shooterB1.currVelocity.y = player.getPosition().y + player.getRadius();
+					shooterBullets.push_back(Bullet(shooterB1));
+					shooterEnemy[j].canShoot = false;
+				}
+				else if (!shooterEnemy[j].canShoot)
+				{
+					if (shooterEnemy[j].coolDown < shooterEnemy[j].shootMaxCoolDown)
+					{
+						shooterEnemy[j].coolDown = clock() / (float)CLOCKS_PER_SEC;
+					}
+					else
+					{
+						shooterEnemy[j].canShoot = true;
+					}
+
+				}
+
+			}
+			for (size_t i = 0; i < shooterBullets.size(); i++) 
+			{
+				window.draw(shooterBullets[i].shape);
+				shooterBullets[i].shape.move(shooterBullets[i].currVelocity);
+				if ((shooterBullets[i].shape.getPosition().x < player.getPosition().x + player.getRadius()) && (shooterBullets[i].shape.getPosition().y < player.getPosition().y + player.getRadius()) && (player.getPosition().x > player.getPosition().x - player.getRadius()) && (shooterBullets[i].shape.getPosition().y > player.getPosition().y - player.getRadius()))
+				{
+					isAlive = false;
+				}
+			}*/
 
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
@@ -283,6 +317,126 @@ int main()
 	
 }
 
+std::vector<Enemy> SpawnEnemyRusher(int number)
+{
+	std::vector<Enemy> rusher(number);
+	for (int i = 0; i < rusher.size(); i++)
+	{
+		int enemyStartPosX = rand() % 1100;
+		int enemyStartPosY = rand() % 1100;
+		rusher[i].enemyCircleShape.setRadius(15.f);
+		rusher[i].enemyCircleShape.setFillColor(Color::Green);
+		rusher[i].enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
+	}
+	return rusher;
+}
+
+std::vector<Shooter> SpawnEnemyShooter(int number)
+{
+	std::vector<Shooter> shooter(number);
+	for (int i = 0; i < shooter.size(); i++)
+	{
+		int enemyStartPosX = rand() % 1100;
+		int enemyStartPosY = rand() % 1100;
+		shooter[i].shooterShape.setRadius(20.f);
+		shooter[i].shooterShape.setPointCount(3);
+		shooter[i].shooterShape.setFillColor(Color::Red);
+		shooter[i].shooterShape.setPosition(enemyStartPosX, enemyStartPosY);
+	}
+	return shooter;
+}
+
+void RusherParameters(Enemy& rusher, CircleShape& player)
+{
+	if (!rusher.isDead)
+	{
+		//mouvements des ennemis
+		if ((rusher.enemyCircleShape.getPosition().x > player.getPosition().x))
+		{
+			rusher.enemyCircleShape.move(-rusher.rusherSpeed, 0.f);
+		}
+		if ((rusher.enemyCircleShape.getPosition().y > player.getPosition().y))
+		{
+			rusher.enemyCircleShape.move(0.f, -rusher.rusherSpeed);
+		}
+		if ((rusher.enemyCircleShape.getPosition().x < player.getPosition().x))
+		{
+			rusher.enemyCircleShape.move(rusher.rusherSpeed, 0.f);
+		}
+		if ((rusher.enemyCircleShape.getPosition().y < player.getPosition().y))
+		{
+			rusher.enemyCircleShape.move(0.f, rusher.rusherSpeed);
+		}
+
+		rusher.timeOfDeath = clock() / CLOCKS_PER_SEC;
+	}
+	else
+	{
+		//quand mort s'il peut revivre, attend son cooldown avant de revivre
+		if (rusher.isReviving < rusher.respawnPourcentage)
+		{
+			if (rusher.reviveTime < rusher.timeOfDeath + rusher.timeBeforeRevive)
+			{
+				rusher.reviveTime = clock() / CLOCKS_PER_SEC;
+			}
+			else
+			{
+				rusher.isDead = false;
+				rusher.isReviving = rand() % 100;
+				rusher.enemyCircleShape.setFillColor(Color::Green);
+			}
+
+		}
+	}
+
+}
+
+void ShooterParameters(Shooter& shooter, CircleShape& player, vector<Bullet>& shooterBullets, Bullet &shooterB1)
+{
+	if (!shooter.isDead)
+	{
+		//mouvements des ennemis
+		if (!((shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 25)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 25)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 25)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 25))))
+		{
+			if ((shooter.shooterShape.getPosition().x > player.getPosition().x))
+			{
+				shooter.shooterShape.move(-shooter.shooterSpeed, 0.f);
+			}
+			if ((shooter.shooterShape.getPosition().y > player.getPosition().y))
+			{
+				shooter.shooterShape.move(0.f, -shooter.shooterSpeed);
+			}
+			if ((shooter.shooterShape.getPosition().x < player.getPosition().x))
+			{
+				shooter.shooterShape.move(shooter.shooterSpeed, 0.f);
+			}
+			if ((shooter.shooterShape.getPosition().y < player.getPosition().y))
+			{
+				shooter.shooterShape.move(0.f, shooter.shooterSpeed);
+			}
+		}
+		shooter.timeOfDeath = clock() / CLOCKS_PER_SEC;
+	}
+	else
+	{
+		//quand mort s'il peut revivre, attend son cooldown avant de revivre
+		if (shooter.isReviving < shooter.respawnPourcentage)
+		{
+			if (shooter.reviveTime < shooter.timeOfDeath + shooter.timeBeforeRevive)
+			{
+				shooter.reviveTime = clock() / CLOCKS_PER_SEC;
+			}
+			else
+			{
+				shooter.isDead = false;
+				shooter.isReviving = rand() % 100;
+				shooter.shooterShape.setFillColor(Color::Red);
+			}
+
+		}
+	}
+}
+
 void Reload(int& currentammo, int& maxammo)
 {
 	cout << "Reloading.." << endl;
@@ -301,6 +455,6 @@ void Reload(int& currentammo, int& maxammo)
 
 
 }
-
-
-
+//condition pour aimanter un element
+// variable etant pour le shooter
+//if(shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 2))

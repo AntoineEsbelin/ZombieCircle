@@ -3,7 +3,7 @@
 using namespace sf;
 using namespace std;
 
-void Reload(int& currentammo, int& maxammo);
+
 
 // Classe pour les munitions 
 
@@ -35,27 +35,29 @@ struct Enemy
 	int respawnPourcentage = 50;
 };
 
-std::vector<Enemy> SpawnEnemyRusher(int number)
-{
-	std::vector<Enemy> rusher(number);
-	for(int i = 0; i < rusher.size(); i++)
-	{
-		int enemyStartPosX = rand() % 1100;
-		int enemyStartPosY = rand() % 1100;
-		rusher[i].enemyCircleShape.setRadius(15.f);
-		rusher[i].enemyCircleShape.setFillColor(Color::Green);
-		rusher[i].enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
 
-	}
-	return rusher;
-}
 
-struct AmmoBox
+struct Shooter
 {
-	int ammmo = 5;
-	RectangleShape ammoShape;
-	bool giveAmmo;
-	
+	CircleShape shooterShape;
+	bool isDead = false;
+	float shooterSpeed = rand() % 4 + 1;
+	float timeOfDeath = 0.f;
+	float coolDown = timeOfDeath + timeBeforeRevive;
+	float timeBeforeRevive = 3.f;
+	float reviveTime = 0.f;
+	int isReviving = rand() % 100;
+	int respawnPourcentage = 40;
+
+	float shootMaxCoolDown = shooted + 2.f;
+	float shooted = 0.f;
+	bool canShoot = false;
+	float shootCoolDown = 0.f;
 };
 
-
+void Reload(int& currentammo, int& maxammo);
+std::vector<Enemy> SpawnEnemyRusher(int number);
+std::vector<Shooter> SpawnEnemyShooter(int number);
+void RusherParameters(Enemy& rusher, CircleShape& player);
+void ShooterParameters(Shooter& shooter, CircleShape& player, vector<Bullet>& shooterBullets, Bullet& shooterB1);
+void Reload(int& currentammo, int& maxammo);
