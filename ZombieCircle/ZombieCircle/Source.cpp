@@ -22,7 +22,6 @@ int main()
 	float xwindow = window.getSize().x;
 	float ywindow = window.getSize().y;
 
-	
 
 	// Player
 
@@ -83,10 +82,7 @@ int main()
 	bg.setPosition(window.getView().getCenter());
 	bg.setFillColor(Color::Black);
 
-
 	Clock clocked;
-
-	
 
 	while (window.isOpen())
 	{
@@ -125,21 +121,21 @@ int main()
 			{
 				//mouvements des ennemis
 				if ((enemy[i].enemyCircleShape.getPosition().x > player.getPosition().x))
-				{
+				
 					enemy[i].enemyCircleShape.move(-enemy[i].rusherSpeed, 0.f);
-				}
+				
 				if ((enemy[i].enemyCircleShape.getPosition().y > player.getPosition().y))
-				{
+				
 					enemy[i].enemyCircleShape.move(0.f, -enemy[i].rusherSpeed);
-				}
+				
 				if ((enemy[i].enemyCircleShape.getPosition().x < player.getPosition().x))
-				{
+				
 					enemy[i].enemyCircleShape.move(enemy[i].rusherSpeed, 0.f);
-				}
+				
 				if ((enemy[i].enemyCircleShape.getPosition().y < player.getPosition().y))
-				{
+				
 					enemy[i].enemyCircleShape.move(0.f, enemy[i].rusherSpeed);
-				}
+				
 
 				// Mort du joueur en contact d'un ennemi 
 				if ((player.getPosition().x < enemy[i].enemyCircleShape.getPosition().x + enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < enemy[i].enemyCircleShape.getPosition().y + enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > enemy[i].enemyCircleShape.getPosition().x - enemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > enemy[i].enemyCircleShape.getPosition().y - enemy[i].enemyCircleShape.getRadius()))
@@ -154,9 +150,9 @@ int main()
 				if (enemy[i].isReviving < enemy[i].respawnPourcentage)
 				{
 					if (enemy[i].reviveTime < enemy[i].timeOfDeath + enemy[i].timeBeforeRevive)
-					{
+					
 						enemy[i].reviveTime = clock() / CLOCKS_PER_SEC;						
-					}
+					
 					else
 					{
 						enemy[i].isDead = false;
@@ -203,23 +199,21 @@ int main()
 		// Cooldown d'attaque ( en n'attaquant pas pendant un moment , la prochaine attaque enverra 2 bullets d'affilé ) 
 		if (attackCooldown >= attackCooldownMax) {
 			attackCooldown = 0.f;
-			canAttack = true;
-			
+			canAttack = true;	
 		}
-		else {
+		else 
 			attackCooldown += 0.5f;
-		}
+		
 
 		// Cooldown reload
 		
 		if (rCooldown >= rCooldownMax) {
 			rCooldown = 0.f;
-			canR = true;
-			
+			canR = true;		
 		}
-		else {
+		else 
 			rCooldown += 0.5f;
-		}
+		
 
 		//Munition
 		if (Keyboard::isKeyPressed(Keyboard::Key::R) && maxammo > 0 && canR)
@@ -242,10 +236,9 @@ int main()
 			for (int i = 0; i < enemy.size(); i++)
 			{
 				if (!enemy[i].isDead || (enemy[i].isReviving < enemy[i].respawnPourcentage))
-				{
 					window.draw(enemy[i].enemyCircleShape);
-				}
 			}
+
 			// Tir des projectiles 
 			for (size_t i = 0; i < bullets.size(); i++) {
 				window.draw(bullets[i].shape);
@@ -286,7 +279,6 @@ int main()
 		if (Keyboard::isKeyPressed(Keyboard::Key::Escape))
 			window.close();
 	}
-
 	
 	
 }

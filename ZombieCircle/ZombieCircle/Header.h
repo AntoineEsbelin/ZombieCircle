@@ -1,14 +1,11 @@
 #pragma once
-//void RectMovement(sf::RectangleShape& rect, float deltaTime);
-
-//void RectMovement(sf::RectangleShape& rect, float deltaTime);
-
-
 
 using namespace sf;
 using namespace std;
 
 void Reload(int& currentammo, int& maxammo);
+
+// Classe pour les munitions 
 
 class Bullet {
 public:
@@ -22,6 +19,8 @@ public:
 		this->shape.setFillColor(Color::Red);
 	}
 };
+
+// Struct enemi zombie de base ( cours et pourcentae de chance de revivre )
 
 struct Enemy
 {
@@ -46,8 +45,17 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 		rusher[i].enemyCircleShape.setRadius(15.f);
 		rusher[i].enemyCircleShape.setFillColor(Color::Green);
 		rusher[i].enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
+
 	}
 	return rusher;
 }
+
+struct AmmoBox
+{
+	int ammmo = 5;
+	RectangleShape ammoShape;
+	bool giveAmmo;
+	
+};
 
 
