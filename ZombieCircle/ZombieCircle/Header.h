@@ -33,7 +33,17 @@ struct Enemy
 	float timeBeforeRevive = 2.f;
 	float reviveTime = 0.f;
 	int isReviving = rand() % 100;
-	int respawnPourcentage = 50;
+	int respawnPourcentage = 0;
+};
+
+struct Ammo
+{
+	bool isPicked = false;
+	RectangleShape ammoShape;
+	bool giveAmmo;
+	int ammoMount = 5;
+	int ammoisSpawning = rand() % 100;
+	int spawnPourcent = 100;
 };
 
 std::vector<Enemy> SpawnEnemyRusher(int number)

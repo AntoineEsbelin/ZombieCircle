@@ -63,6 +63,11 @@ int main()
 	string maxammostri = to_string(maxammo);
 	maxammotext.setString(maxammostri);
 
+	Ammo ammo;
+	vector<Ammo> ammoItems;
+	
+	
+
 	//Cooldown
 	bool canAttack = true;
 	float attackCooldownMax = 10.f;
@@ -90,6 +95,7 @@ int main()
 
 	while (window.isOpen())
 	{
+		ammoItems.push_back(Ammo(ammo));
 		// Inputs
 		Event event;
 		while (window.pollEvent(event))
@@ -117,6 +123,7 @@ int main()
 		mousePosWindow = Vector2f(Mouse::getPosition(window));
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
+		
 		
 		//boucle pour chaque ennemis
 		for (int i = 0; i < enemy.size(); i++)
@@ -165,6 +172,8 @@ int main()
 					}
 					
 				}
+				
+				
 			}
 		}
 
@@ -267,6 +276,8 @@ int main()
 					
 				}
 			}
+
+			
 
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
