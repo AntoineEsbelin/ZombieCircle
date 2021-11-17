@@ -72,3 +72,6 @@ std::vector<Shooter> SpawnEnemyShooter(int number);
 void RusherParameters(Enemy& rusher, CircleShape& player);
 void ShooterParameters(Shooter& shooter, CircleShape& player, vector<Bullet>& shooterBullets, Bullet& shooterB1);
 void Reload(int& currentammo, int& maxammo);
+void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> ennemies);
+
+

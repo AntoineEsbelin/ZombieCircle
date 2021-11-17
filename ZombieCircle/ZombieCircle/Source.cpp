@@ -9,8 +9,6 @@
 #include <time.h>
 
 
-
-
 int main()
 {
 	srand(time(NULL));
@@ -64,8 +62,11 @@ int main()
 	string maxammostri = to_string(maxammo);
 	maxammotext.setString(maxammostri);
 
-	Ammo ammo;
-	vector<Ammo> ammoItems;
+	CircleShape ammoBox;
+	ammoBox.setFillColor(Color::Magenta);
+	ammoBox.setRadius(20.f);
+
+	
 	
 	
 
@@ -109,7 +110,7 @@ int main()
 
 	while (window.isOpen())
 	{
-		ammoItems.push_back(Ammo(ammo));
+		
 		// Inputs
 		Event event;
 		while (window.pollEvent(event))
@@ -236,6 +237,7 @@ int main()
 						rusherEnemy.erase(rusherEnemy.begin() + i);
 						completion += 1;
 						cout << completion << "\n";
+						Ammo(window, currentammo, ammoBox, rusherEnemy);
 
 					}
 				}
@@ -480,6 +482,7 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 	return rusher;
 }
 
+
 std::vector<Shooter> SpawnEnemyShooter(int number)
 {
 	std::vector<Shooter> shooter(number);
@@ -605,6 +608,18 @@ void Reload(int& currentammo, int& maxammo)
 
 }
 
+
+
 //condition pour aimanter un element
 // variable etant pour le shooter
 //if(shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 2))
+
+void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> enemies) {
+
+	for (int i = 0; i < enemies.size(); i++)
+	{
+		ammoBox.setPosition(enemies[i].enemyCircleShape.getPosition().x, enemies[i].enemyCircleShape.getPosition().y);
+	}
+	currentAmmo += 20;
+	window.draw(ammoBox);
+}
