@@ -55,22 +55,15 @@ struct Shooter
 	float shootCoolDown = 0.f;
 };
 
-class ShooterBullet {
-public:
-	CircleShape shape;
-	Vector2f currVelocity;
-	float maxSpeed;
-
-	ShooterBullet(float radius = 5.f) : currVelocity(0.f, 0.f), maxSpeed(15.f)
-	{
-		this->shape.setRadius(radius);
-		this->shape.setFillColor(Color::Blue);
-	}
+struct shooterBullet
+{
+	CircleShape bulletShape;
+	float bulletSpeed = .05f;
+	Vector2f playerPosition;
 };
-
 void Reload(int& currentammo, int& maxammo);
 std::vector<Enemy> SpawnEnemyRusher(int number);
 std::vector<Shooter> SpawnEnemyShooter(int number);
 void RusherParameters(Enemy& rusher, CircleShape& player);
-void ShooterParameters(Shooter& shooter, CircleShape& player, vector<Bullet>& shooterBullets, Bullet& shooterB1);
+void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBullet>& shooterBullets);
 void Reload(int& currentammo, int& maxammo);

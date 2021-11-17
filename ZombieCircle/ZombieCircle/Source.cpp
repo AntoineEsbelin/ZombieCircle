@@ -37,11 +37,11 @@ int main()
 
 	// Projectiles
 	Bullet b1;
-	Bullet shooterB1;
+	shooterBullet shooterB1;
 	
 
 	vector<Bullet> bullets;
-	vector<Bullet> shooterBullets;
+	vector<shooterBullet> shooterBullets;
 
 	//Munition
 	int maxammo = 25;
@@ -58,7 +58,7 @@ int main()
 	string ammostri = to_string(currentammo);
 	currentammotext.setString(ammostri);
 	currentammotext.setFillColor(Color::White);
-	currentammotext.setPosition(/*xwindow - 100*/player.getPosition().x, /*ywindow - 100*/ player.getPosition().y);
+	currentammotext.setPosition(player.getPosition().x, player.getPosition().y);
 
 	Text maxammotext;
 	string maxammostri = to_string(maxammo);
@@ -74,7 +74,7 @@ int main()
 	bool isAlive = true;
 
 	// Enemies
-	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
+	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(0);
 	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
 
 	// Background
@@ -88,7 +88,7 @@ int main()
 
 	Clock clocked;
 
-	
+	Vector2f test;
 
 	while (window.isOpen())
 	{
@@ -119,7 +119,6 @@ int main()
 		mousePosWindow = Vector2f(Mouse::getPosition(window));
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
-		
 		
 
 		//D�placement du joueur 
@@ -221,7 +220,7 @@ int main()
 			for (int i = 0; i < shooterEnemy.size(); i++)
 			{
 
-				ShooterParameters(shooterEnemy[i], player, shooterBullets, shooterB1);
+				ShooterParameters(shooterEnemy[i], player, shooterBullets);
 				if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
 				{
 					window.draw(shooterEnemy[i].shooterShape);
@@ -265,23 +264,51 @@ int main()
 				}
 			}
 
+			
+			for (int i = 0; i < shooterBullets.size(); i++)
+			{
+				window.draw(shooterBullets[i].bulletShape);
+				shooterBullets[i].bulletShape.move(shooterBullets[i].playerPosition * shooterBullets[i].bulletSpeed);
+				if ((player.getPosition().x < shooterBullets[i].bulletShape.getPosition().x + shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().y < shooterBullets[i].bulletShape.getPosition().y + shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().x > shooterBullets[i].bulletShape.getPosition().x - shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().y > shooterBullets[i].bulletShape.getPosition().y - shooterBullets[i].bulletShape.getRadius()))
+				{
+					isAlive = false;
+				}
+			}
 			//tir des shooter
-			/*for (int j = 0; j < shooterEnemy.size(); j++)
+			for (int j = 0; j < shooterEnemy.size(); j++)
 			{
 				if (shooterEnemy[j].canShoot)
 				{
-					shooterEnemy[j].shooted = clock() / (float)CLOCKS_PER_SEC;
-					shooterB1.shape.setPosition(shooterEnemy[j].shooterShape.getPosition());
-					shooterB1.currVelocity.x = player.getPosition().x + player.getRadius();
-					shooterB1.currVelocity.y = player.getPosition().y + player.getRadius();
-					shooterBullets.push_back(Bullet(shooterB1));
+					shooterEnemy[j].shooted = clock() / CLOCKS_PER_SEC;
+					shooterB1.bulletShape.setRadius(5.f);
+					shooterB1.bulletShape.setFillColor(Color::Blue);
+					shooterB1.bulletShape.setPosition(shooterEnemy[j].shooterShape.getPosition());
+					if (player.getPosition().x < shooterEnemy[j].shooterShape.getPosition().x)
+					{
+						shooterB1.playerPosition.x = (player.getPosition().x + 0.01f) - shooterEnemy[j].shooterShape.getPosition().x;
+					}
+					else
+					{
+
+						shooterB1.playerPosition.x = -(shooterEnemy[j].shooterShape.getPosition().x - (player.getPosition().x + 0.01f));
+					}
+					if (player.getPosition().y < shooterEnemy[j].shooterShape.getPosition().y)
+					{
+						shooterB1.playerPosition.y = (player.getPosition().y + 0.01f) - shooterEnemy[j].shooterShape.getPosition().y;
+					}
+					else
+					{
+						shooterB1.playerPosition.y = -(shooterEnemy[j].shooterShape.getPosition().y - (player.getPosition().y + 0.01f));
+					}
+					shooterBullets.push_back(shooterBullet(shooterB1));
 					shooterEnemy[j].canShoot = false;
 				}
-				else if (!shooterEnemy[j].canShoot)
+				else
 				{
-					if (shooterEnemy[j].coolDown < shooterEnemy[j].shootMaxCoolDown)
+					shooterEnemy[j].shootMaxCoolDown = shooterEnemy[j].shooted + 2.f;
+					if (shooterEnemy[j].shootCoolDown < shooterEnemy[j].shootMaxCoolDown)
 					{
-						shooterEnemy[j].coolDown = clock() / (float)CLOCKS_PER_SEC;
+						shooterEnemy[j].shootCoolDown = clock() / CLOCKS_PER_SEC;
 					}
 					else
 					{
@@ -291,16 +318,7 @@ int main()
 				}
 
 			}
-			for (size_t i = 0; i < shooterBullets.size(); i++) 
-			{
-				window.draw(shooterBullets[i].shape);
-				shooterBullets[i].shape.move(shooterBullets[i].currVelocity);
-				if ((shooterBullets[i].shape.getPosition().x < player.getPosition().x + player.getRadius()) && (shooterBullets[i].shape.getPosition().y < player.getPosition().y + player.getRadius()) && (player.getPosition().x > player.getPosition().x - player.getRadius()) && (shooterBullets[i].shape.getPosition().y > player.getPosition().y - player.getRadius()))
-				{
-					isAlive = false;
-				}
-			}*/
-
+			
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
 				player.setPosition(0.f, player.getPosition().y);
@@ -398,7 +416,7 @@ void RusherParameters(Enemy& rusher, CircleShape& player)
 
 }
 
-void ShooterParameters(Shooter& shooter, CircleShape& player, vector<Bullet>& shooterBullets, Bullet &shooterB1)
+void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBullet>& shooterBullets)
 {
 	if (!shooter.isDead)
 	{
