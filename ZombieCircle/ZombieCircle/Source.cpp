@@ -8,11 +8,24 @@
 #include <vector>
 #include <time.h>
 
+string getAppPath();
+string getAssetsPath();
 
 int main()
-{
+{	
+	// Texte
+
+	sf::Font arial;
+	arial.loadFromFile(getAssetsPath() + "\\arial.ttf");
+	sf::Text text;
+	text.setFont(arial);
+	text.setString("Level: ");
+	text.setCharacterSize(40);
+	
+
 	srand(time(NULL));
 	// Fen�tre
+
 	RenderWindow window(VideoMode(1200, 950), "ZombieCircle");
 	window.setVerticalSyncEnabled(true);
 	window.setFramerateLimit(60);
@@ -34,6 +47,7 @@ int main()
 	Vector2f aimDirNorm;
 
 	// Projectiles
+
 	Bullet b1;
 	shooterBullet shooterB1;
 
@@ -42,6 +56,7 @@ int main()
 	vector<shooterBullet> shooterBullets;
 
 	//Munition
+
 	int maxammo = 25;
 	int currentammo = 100;
 	float reloadtime = 1.f;
@@ -52,6 +67,7 @@ int main()
 	float rCooldown = 0.f;
 
 	//Affichage Munition
+
 	Text currentammotext;
 	string ammostri = to_string(currentammo);
 	currentammotext.setString(ammostri);
@@ -66,11 +82,8 @@ int main()
 	ammoBox.setFillColor(Color::Magenta);
 	ammoBox.setRadius(20.f);
 
-
-
-
-
 	//Cooldown
+
 	bool canAttack = true;
 	float attackCooldownMax = 10.f;
 	float attackCooldown = 10.f;
@@ -80,6 +93,7 @@ int main()
 	bool isAlive = true;
 
 	// Enemies
+
 	bool shooterSpawned = false;
 
 	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
@@ -96,6 +110,7 @@ int main()
 	bg.setPosition(window.getView().getCenter());
 	bg.setFillColor(Color::Black);
 	Clock clocked;
+
 	// Levels
 
 	int completion = 0;
@@ -103,6 +118,8 @@ int main()
 	bool level2 = false;
 	bool level3 = false;
 	bool level4 = false;
+
+
 
 
 
@@ -201,8 +218,8 @@ int main()
 		}
 		window.clear();
 
-		window.draw(bg);
-
+		window.draw(bg);		
+		window.draw(text);
 		window.draw(player);
 		window.draw(currentammotext);
 
@@ -342,30 +359,30 @@ int main()
 
 											// LEVEL 4
 
-			if (level4 == true) {
+		if (level4 == true) {
 				
-				if (!shooterSpawned)
-				{
+			if (!shooterSpawned)
+			{
 					shooterEnemy = SpawnEnemyShooter(2);
 					shooterSpawned = true;
-				}
+			}
 				//SHOOTER
-				for (int i = 0; i < shooterEnemy.size(); i++)
-				{
+			for (int i = 0; i < shooterEnemy.size(); i++)
+			{
 					
-					window.draw(shooterEnemy[i].shooterShape);
+				window.draw(shooterEnemy[i].shooterShape);
 
-					ShooterParameters(shooterEnemy[i], player, shooterBullets);
-					if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
-					{
+				ShooterParameters(shooterEnemy[i], player, shooterBullets);
+				if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
+				{
 						window.draw(shooterEnemy[i].shooterShape);
-					}
-					else
-					{
+				}
+				else
+				{
 						shooterEnemy.erase(shooterEnemy.begin() + i);
 						completion += 1;
-					}
 				}
+			}
 
 				for (int i = 0; i < rusherEnemy4.size(); i++)
 				{
@@ -394,9 +411,7 @@ int main()
 
 						if (completion == 10) {
 
-							level4 = false;
-							//level4 = true;
-							//cout << "level 2 : " << level2 << "\n";
+							level4 = false;							
 							completion = 0;
 
 
@@ -545,9 +560,11 @@ int main()
 
 	}
 
-std::vector<Enemy> SpawnEnemyRusher(int number)
+	// Le spawner des ennemis coureurs
+
+vector<Enemy> SpawnEnemyRusher(int number)
 {
-	std::vector<Enemy> rusher(number);
+	vector<Enemy> rusher(number);
 	for (int i = 0; i < rusher.size(); i++)
 	{
 		int enemyStartPosX = rand() % 1100;
@@ -559,10 +576,11 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 	return rusher;
 }
 
+// Spawner des ennemis shooters
 
-std::vector<Shooter> SpawnEnemyShooter(int number)
+vector<Shooter> SpawnEnemyShooter(int number)
 {
-	std::vector<Shooter> shooter(number);
+	vector<Shooter> shooter(number);
 	for (int i = 0; i < shooter.size(); i++)
 	{
 		int enemyStartPosX = rand() % 1100;
@@ -574,6 +592,27 @@ std::vector<Shooter> SpawnEnemyShooter(int number)
 	}
 	return shooter;
 }
+
+// Ajout d'Arial pour le texte
+
+string getAppPath() {
+	char cExeFilePath[256];
+	GetModuleFileNameA(NULL, cExeFilePath, 256);
+	string exeFilePath = cExeFilePath;
+	int exeNamePos = exeFilePath.find_last_of("\\/");
+	string appPath = exeFilePath.substr(0, exeNamePos + 1);
+	return appPath;
+}
+
+string getAssetsPath() {
+	string assetsPath = getAppPath() + "\Assets";
+	return assetsPath;
+}
+
+
+
+												// FONCTIONS
+
 
 void RusherParameters(Enemy& rusher, CircleShape& player)
 {
@@ -666,6 +705,7 @@ void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBull
 	}
 }
 
+// Fct pour reload
 void Reload(int& currentammo, int& maxammo)
 {
 	cout << "Reloading.." << endl;
@@ -691,6 +731,7 @@ void Reload(int& currentammo, int& maxammo)
 // variable etant pour le shooter
 //if(shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 2))
 
+// Fct des boites de munitions 
 void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> enemies) {
 
 	for (int i = 0; i < enemies.size(); i++)
