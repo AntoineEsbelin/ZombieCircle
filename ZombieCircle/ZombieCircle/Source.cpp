@@ -9,26 +9,24 @@
 #include <time.h>
 
 
-
-
 int main()
 {
 	srand(time(NULL));
 	// Fen�tre
-	RenderWindow window(VideoMode(1100, 1100), "ZombieCircle");
+	RenderWindow window(VideoMode(1200, 950), "ZombieCircle");
 	window.setVerticalSyncEnabled(true);
 	window.setFramerateLimit(60);
 
 	float xwindow = window.getSize().x;
 	float ywindow = window.getSize().y;
 
-	
 
 	// Player
 
 	CircleShape player;
 	player.setRadius(25.f);
 	player.setFillColor(Color::Magenta);
+	player.setPosition(xwindow/2, ywindow);
 
 	Vector2f playerCenter;
 	Vector2f mousePosWindow;
@@ -45,7 +43,7 @@ int main()
 
 	//Munition
 	int maxammo = 25;
-	int currentammo = 10;
+	int currentammo = 100;
 	float reloadtime = 1.f;
 	cout << "Ammo : " << currentammo << endl;
 
@@ -64,6 +62,14 @@ int main()
 	string maxammostri = to_string(maxammo);
 	maxammotext.setString(maxammostri);
 
+	CircleShape ammoBox;
+	ammoBox.setFillColor(Color::Magenta);
+	ammoBox.setRadius(20.f);
+
+	
+	
+	
+
 	//Cooldown
 	bool canAttack = true;
 	float attackCooldownMax = 10.f;
@@ -79,19 +85,36 @@ int main()
 
 	// Background
 
-	RectangleShape bg(Vector2f(1100, 1100));
+	RectangleShape bg(Vector2f(1200, 900));
 	FloatRect bgRect = bg.getLocalBounds();
 	bg.setOrigin(bgRect.left + bgRect.width / 2.0f, bgRect.top + bgRect.height / 2.0f);
 	bg.setPosition(window.getView().getCenter());
 	bg.setFillColor(Color::Black);
 
+	// Levels
 
-	Clock clocked;
+	int completion = 0;
+	bool level1 = true;
+	bool level2 = false;
+	bool level3 = false;
+
+	// Enemies
+		// rushers
+	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
+	std::vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
+	std::vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
+
+		// shooters
+
+	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
 
 	Vector2f test;
 
+	Clock clocked;
+
 	while (window.isOpen())
 	{
+		
 		// Inputs
 		Event event;
 		while (window.pollEvent(event))
@@ -120,7 +143,6 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 		
-
 		//D�placement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q) && isAlive == true)
 			player.move(-5.f, 0.f);
@@ -156,23 +178,21 @@ int main()
 		// Cooldown d'attaque ( en n'attaquant pas pendant un moment , la prochaine attaque enverra 2 bullets d'affilé ) 
 		if (attackCooldown >= attackCooldownMax) {
 			attackCooldown = 0.f;
-			canAttack = true;
-			
+			canAttack = true;	
 		}
-		else {
+		else 
 			attackCooldown += 0.5f;
-		}
+		
 
 		// Cooldown reload
 		
 		if (rCooldown >= rCooldownMax) {
 			rCooldown = 0.f;
-			canR = true;
-			
+			canR = true;		
 		}
-		else {
+		else 
 			rCooldown += 0.5f;
-		}
+		
 
 		//Munition
 		if (Keyboard::isKeyPressed(Keyboard::Key::R) && maxammo > 0 && canR)
@@ -189,47 +209,156 @@ int main()
 			
 			window.draw(player);
 			window.draw(currentammotext);
+
 			
 			//boucle pour chaque ennemis
 				//RUSHER
-			for (int i = 0; i < rusherEnemy.size(); i++)
-			{
-				//fonctions general du rusher
-				RusherParameters(rusherEnemy[i], player);
-				// Mort du joueur en contact d'un ennemi 
-				if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
+
+												// LEVEL 1 
+
+
+			if (level1 == true) {
+				for (int i = 0; i < rusherEnemy.size(); i++)
 				{
-					if (!rusherEnemy[i].isDead)
+					//fonctions general du rusher
+					RusherParameters(rusherEnemy[i], player);
+					// Mort du joueur en contact d'un ennemi 
+					if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
 					{
-						isAlive = false;
+						if (!rusherEnemy[i].isDead)
+						{
+							isAlive = false;
+						}
+					}
+					//Affiche les ennemis s'ils sont pas morts
+					//pour les rusher
+					if (!rusherEnemy[i].isDead || (rusherEnemy[i].isReviving < rusherEnemy[i].respawnPourcentage))
+					{
+						window.draw(rusherEnemy[i].enemyCircleShape);
+					}
+					else
+					{
+						rusherEnemy.erase(rusherEnemy.begin() + i);
+						completion += 1;
+						cout << completion << "\n";
+						Ammo(window, currentammo, ammoBox, rusherEnemy);
+
 					}
 				}
-				//Affiche les ennemis s'ils sont pas morts
-				//pour les rusher
-				if (!rusherEnemy[i].isDead || (rusherEnemy[i].isReviving < rusherEnemy[i].respawnPourcentage))
-				{
-					window.draw(rusherEnemy[i].enemyCircleShape);
-				}
-				else
-				{
-					rusherEnemy.erase(rusherEnemy.begin() + i);
+
+				if (completion == 3) {
+
+					level1 = false;
+					level2 = true;
+					cout << "level 2 : " << level2 << "\n";
+					completion = 0;
+
+
 				}
 			}
+
+											// LEVEL 2
+
+			if (level2 == true) {
+				for (int i = 0; i < rusherEnemy2.size(); i++)
+				{
+					//fonctions general du rusher
+					RusherParameters(rusherEnemy2[i], player);
+					// Mort du joueur en contact d'un ennemi 
+					if ((player.getPosition().x < rusherEnemy2[i].enemyCircleShape.getPosition().x + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy2[i].enemyCircleShape.getPosition().y + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy2[i].enemyCircleShape.getPosition().x - rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy2[i].enemyCircleShape.getPosition().y - rusherEnemy2[i].enemyCircleShape.getRadius()))
+					{
+						if (!rusherEnemy2[i].isDead)
+						{
+							isAlive = false;
+						}
+					}
+					//Affiche les ennemis s'ils sont pas morts
+					//pour les rusher
+					if (!rusherEnemy2[i].isDead || (rusherEnemy2[i].isReviving < rusherEnemy2[i].respawnPourcentage))
+					{
+						window.draw(rusherEnemy2[i].enemyCircleShape);
+					}
+					else
+					{
+						rusherEnemy2.erase(rusherEnemy2.begin() + i);
+						completion += 1;
+						cout << completion << "\n";
+
+					}
+				}
+		
+
+				if (completion == 6) {
+
+					level2 = false;
+					level3 = true;
+					cout << "level3 : " << level3 << "\n";
+					completion = 0;
+
+
+				}
+
+			}
+
+			// LEVEL 3
+
+			if (level3 == true) {
 
 				//SHOOTER
-			for (int i = 0; i < shooterEnemy.size(); i++)
-			{
+				for (int i = 0; i < shooterEnemy.size(); i++)
+				{
 
-				ShooterParameters(shooterEnemy[i], player, shooterBullets);
-				if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
-				{
-					window.draw(shooterEnemy[i].shooterShape);
+					ShooterParameters(shooterEnemy[i], player, shooterBullets, shooterB1);
+					if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
+					{
+						window.draw(shooterEnemy[i].shooterShape);
+					}
+					else
+					{
+						shooterEnemy.erase(shooterEnemy.begin() + i);
+						completion += 1;
+					}
 				}
-				else
+
+				for (int i = 0; i < rusherEnemy3.size(); i++)
 				{
-					shooterEnemy.erase(shooterEnemy.begin() + i);
+
+					//fonctions general du rusher
+					RusherParameters(rusherEnemy3[i], player);
+					// Mort du joueur en contact d'un ennemi 
+					if ((player.getPosition().x < rusherEnemy3[i].enemyCircleShape.getPosition().x + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy3[i].enemyCircleShape.getPosition().y + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy3[i].enemyCircleShape.getPosition().x - rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy3[i].enemyCircleShape.getPosition().y - rusherEnemy3[i].enemyCircleShape.getRadius()))
+					{
+						if (!rusherEnemy3[i].isDead)
+						{
+							isAlive = false;
+						}
+					}
+					//Affiche les ennemis s'ils sont pas morts
+					//pour les rusher
+					if (!rusherEnemy3[i].isDead || (rusherEnemy3[i].isReviving < rusherEnemy3[i].respawnPourcentage))
+					{
+						window.draw(rusherEnemy3[i].enemyCircleShape);
+					}
+					else
+					{
+						rusherEnemy3.erase(rusherEnemy3.begin() + i);
+						completion += 1;
+						cout << completion << "\n";
+
+						if (completion == 10) {
+
+							level3 = false;
+							//level4 = true;
+							//cout << "level 2 : " << level2 << "\n";
+							completion = 0;
+
+
+						}
+
+					}
 				}
 			}
+			
 			
 			// Tir des projectiles 
 			for (size_t i = 0; i < bullets.size(); i++) {
@@ -247,6 +376,25 @@ int main()
 						
 					}
 				}
+				for (int j = 0; j < rusherEnemy2.size(); j++)
+				{
+					if ((bullets[i].shape.getPosition().x < rusherEnemy2[j].enemyCircleShape.getPosition().x + rusherEnemy2[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy2[j].enemyCircleShape.getPosition().y + rusherEnemy2[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy2[j].enemyCircleShape.getPosition().x - rusherEnemy2[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy2[j].enemyCircleShape.getPosition().y - rusherEnemy2[j].enemyCircleShape.getRadius()))
+					{
+						rusherEnemy2[j].enemyCircleShape.setFillColor(Color::White);
+						rusherEnemy2[j].isDead = true;
+						
+					}
+				}
+				for (int j = 0; j < rusherEnemy3.size(); j++)
+				{
+					if ((bullets[i].shape.getPosition().x < rusherEnemy3[j].enemyCircleShape.getPosition().x + rusherEnemy3[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy3[j].enemyCircleShape.getPosition().y + rusherEnemy3[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy3[j].enemyCircleShape.getPosition().x - rusherEnemy3[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy3[j].enemyCircleShape.getPosition().y - rusherEnemy3[j].enemyCircleShape.getRadius()))
+					{
+						rusherEnemy3[j].enemyCircleShape.setFillColor(Color::White);
+						rusherEnemy3[j].isDead = true;
+						
+					}
+				}
+
 				//SHOOTER
 				for (int j = 0; j < shooterEnemy.size(); j++)
 				{
@@ -337,7 +485,6 @@ int main()
 		if (Keyboard::isKeyPressed(Keyboard::Key::Escape))
 			window.close();
 	}
-
 	
 	
 }
@@ -348,7 +495,7 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 	for (int i = 0; i < rusher.size(); i++)
 	{
 		int enemyStartPosX = rand() % 1100;
-		int enemyStartPosY = rand() % 1100;
+		int enemyStartPosY = rand() % 700;
 		rusher[i].enemyCircleShape.setRadius(15.f);
 		rusher[i].enemyCircleShape.setFillColor(Color::Green);
 		rusher[i].enemyCircleShape.setPosition(enemyStartPosX, enemyStartPosY);
@@ -356,13 +503,14 @@ std::vector<Enemy> SpawnEnemyRusher(int number)
 	return rusher;
 }
 
+
 std::vector<Shooter> SpawnEnemyShooter(int number)
 {
 	std::vector<Shooter> shooter(number);
 	for (int i = 0; i < shooter.size(); i++)
 	{
 		int enemyStartPosX = rand() % 1100;
-		int enemyStartPosY = rand() % 1100;
+		int enemyStartPosY = rand() % 900;
 		shooter[i].shooterShape.setRadius(20.f);
 		shooter[i].shooterShape.setPointCount(3);
 		shooter[i].shooterShape.setFillColor(Color::Red);
@@ -480,6 +628,19 @@ void Reload(int& currentammo, int& maxammo)
 
 
 }
+
+
+
 //condition pour aimanter un element
 // variable etant pour le shooter
 //if(shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 2))
+
+void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> enemies) {
+
+	for (int i = 0; i < enemies.size(); i++)
+	{
+		ammoBox.setPosition(enemies[i].enemyCircleShape.getPosition().x, enemies[i].enemyCircleShape.getPosition().y);
+	}
+	currentAmmo += 20;
+	window.draw(ammoBox);
+}
