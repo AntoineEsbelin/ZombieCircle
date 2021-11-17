@@ -26,7 +26,7 @@ int main()
 	CircleShape player;
 	player.setRadius(25.f);
 	player.setFillColor(Color::Magenta);
-	player.setPosition(xwindow/2, ywindow);
+	player.setPosition(xwindow / 2, ywindow);
 
 	Vector2f playerCenter;
 	Vector2f mousePosWindow;
@@ -36,7 +36,7 @@ int main()
 	// Projectiles
 	Bullet b1;
 	shooterBullet shooterB1;
-	
+
 
 	vector<Bullet> bullets;
 	vector<shooterBullet> shooterBullets;
@@ -66,22 +66,27 @@ int main()
 	ammoBox.setFillColor(Color::Magenta);
 	ammoBox.setRadius(20.f);
 
-	
-	
-	
+
+
+
 
 	//Cooldown
 	bool canAttack = true;
 	float attackCooldownMax = 10.f;
 	float attackCooldown = 10.f;
-	
+
 	// Player en vie 
 
 	bool isAlive = true;
 
 	// Enemies
-	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(0);
-	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
+	bool shooterSpawned = false;
+
+	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
+	std::vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
+	std::vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
+	std::vector<Enemy> rusherEnemy4 = SpawnEnemyRusher(8);
+	std::vector<Shooter> shooterEnemy;
 
 	// Background
 
@@ -90,31 +95,20 @@ int main()
 	bg.setOrigin(bgRect.left + bgRect.width / 2.0f, bgRect.top + bgRect.height / 2.0f);
 	bg.setPosition(window.getView().getCenter());
 	bg.setFillColor(Color::Black);
-
+	Clock clocked;
 	// Levels
 
 	int completion = 0;
 	bool level1 = true;
 	bool level2 = false;
 	bool level3 = false;
+	bool level4 = false;
 
-	// Enemies
-		// rushers
-	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
-	std::vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
-	std::vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
 
-		// shooters
-
-	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
-
-	Vector2f test;
-
-	Clock clocked;
 
 	while (window.isOpen())
 	{
-		
+
 		// Inputs
 		Event event;
 		while (window.pollEvent(event))
@@ -142,7 +136,9 @@ int main()
 		mousePosWindow = Vector2f(Mouse::getPosition(window));
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
-		
+
+
+
 		//D�placement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q) && isAlive == true)
 			player.move(-5.f, 0.f);
@@ -167,148 +163,199 @@ int main()
 
 				bullets.push_back(Bullet(b1));
 				currentammo--;
-			
+
 				canAttack = false;
 				cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
 
 			}
-			
+
 		}
 
 		// Cooldown d'attaque ( en n'attaquant pas pendant un moment , la prochaine attaque enverra 2 bullets d'affilé ) 
 		if (attackCooldown >= attackCooldownMax) {
 			attackCooldown = 0.f;
-			canAttack = true;	
+			canAttack = true;
 		}
-		else 
+		else
 			attackCooldown += 0.5f;
-		
+
 
 		// Cooldown reload
-		
+
 		if (rCooldown >= rCooldownMax) {
 			rCooldown = 0.f;
-			canR = true;		
+			canR = true;
 		}
-		else 
+		else
 			rCooldown += 0.5f;
-		
+
 
 		//Munition
 		if (Keyboard::isKeyPressed(Keyboard::Key::R) && maxammo > 0 && canR)
 		{
-			
+
 			Reload(currentammo, maxammo);
 			canR = false;
-			
-			
+
+
 		}
-			window.clear();
+		window.clear();
 
-			window.draw(bg);
-			
-			window.draw(player);
-			window.draw(currentammotext);
+		window.draw(bg);
 
-			
-			//boucle pour chaque ennemis
-				//RUSHER
-
-												// LEVEL 1 
+		window.draw(player);
+		window.draw(currentammotext);
 
 
-			if (level1 == true) {
-				for (int i = 0; i < rusherEnemy.size(); i++)
+		//boucle pour chaque ennemis
+			//RUSHER
+
+														// LEVEL 1 
+
+
+		if (level1 == true) {
+			for (int i = 0; i < rusherEnemy.size(); i++)
+			{
+				//fonctions general du rusher
+				RusherParameters(rusherEnemy[i], player);
+				// Mort du joueur en contact d'un ennemi 
+				if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
 				{
-					//fonctions general du rusher
-					RusherParameters(rusherEnemy[i], player);
-					// Mort du joueur en contact d'un ennemi 
-					if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
+					if (!rusherEnemy[i].isDead)
 					{
-						if (!rusherEnemy[i].isDead)
-						{
-							isAlive = false;
-						}
-					}
-					//Affiche les ennemis s'ils sont pas morts
-					//pour les rusher
-					if (!rusherEnemy[i].isDead || (rusherEnemy[i].isReviving < rusherEnemy[i].respawnPourcentage))
-					{
-						window.draw(rusherEnemy[i].enemyCircleShape);
-					}
-					else
-					{
-						rusherEnemy.erase(rusherEnemy.begin() + i);
-						completion += 1;
-						cout << completion << "\n";
-						Ammo(window, currentammo, ammoBox, rusherEnemy);
-
+						isAlive = false;
 					}
 				}
-
-				if (completion == 3) {
-
-					level1 = false;
-					level2 = true;
-					cout << "level 2 : " << level2 << "\n";
-					completion = 0;
-
+				//Affiche les ennemis s'ils sont pas morts
+				//pour les rusher
+				if (!rusherEnemy[i].isDead || (rusherEnemy[i].isReviving < rusherEnemy[i].respawnPourcentage))
+				{
+					window.draw(rusherEnemy[i].enemyCircleShape);
+				}
+				else
+				{
+					rusherEnemy.erase(rusherEnemy.begin() + i);
+					completion += 1;
+					cout << completion << "\n";
+					Ammo(window, currentammo, ammoBox, rusherEnemy);
 
 				}
 			}
 
-											// LEVEL 2
+			if (completion == 3) {
 
-			if (level2 == true) {
-				for (int i = 0; i < rusherEnemy2.size(); i++)
+				level1 = false;
+				level2 = true;
+				cout << "level 2 : " << level2 << "\n";
+				completion = 0;
+
+
+			}
+		}
+
+														// LEVEL 2
+
+		if (level2 == true) {
+			for (int i = 0; i < rusherEnemy2.size(); i++)
+			{
+				//fonctions general du rusher
+				RusherParameters(rusherEnemy2[i], player);
+				// Mort du joueur en contact d'un ennemi 
+				if ((player.getPosition().x < rusherEnemy2[i].enemyCircleShape.getPosition().x + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy2[i].enemyCircleShape.getPosition().y + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy2[i].enemyCircleShape.getPosition().x - rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy2[i].enemyCircleShape.getPosition().y - rusherEnemy2[i].enemyCircleShape.getRadius()))
 				{
-					//fonctions general du rusher
-					RusherParameters(rusherEnemy2[i], player);
-					// Mort du joueur en contact d'un ennemi 
-					if ((player.getPosition().x < rusherEnemy2[i].enemyCircleShape.getPosition().x + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy2[i].enemyCircleShape.getPosition().y + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy2[i].enemyCircleShape.getPosition().x - rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy2[i].enemyCircleShape.getPosition().y - rusherEnemy2[i].enemyCircleShape.getRadius()))
+					if (!rusherEnemy2[i].isDead)
 					{
-						if (!rusherEnemy2[i].isDead)
-						{
-							isAlive = false;
-						}
-					}
-					//Affiche les ennemis s'ils sont pas morts
-					//pour les rusher
-					if (!rusherEnemy2[i].isDead || (rusherEnemy2[i].isReviving < rusherEnemy2[i].respawnPourcentage))
-					{
-						window.draw(rusherEnemy2[i].enemyCircleShape);
-					}
-					else
-					{
-						rusherEnemy2.erase(rusherEnemy2.begin() + i);
-						completion += 1;
-						cout << completion << "\n";
-
+						isAlive = false;
 					}
 				}
+				//Affiche les ennemis s'ils sont pas morts
+				//pour les rusher
+				if (!rusherEnemy2[i].isDead || (rusherEnemy2[i].isReviving < rusherEnemy2[i].respawnPourcentage))
+				{
+					window.draw(rusherEnemy2[i].enemyCircleShape);
+				}
+				else
+				{
+					rusherEnemy2.erase(rusherEnemy2.begin() + i);
+					completion += 1;
+					cout << completion << "\n";
+
+				}
+			}
+
+
+			if (completion == 6) {
+
+				level2 = false;
+				level3 = true;
+				cout << "level3 : " << level4 << "\n";
+				completion = 0;
+
+
+			}
+
+		}		
+
+													// LEVEL 3
+
+		if (level3 == true) {
+			
+			for (int i = 0; i < rusherEnemy3.size(); i++)
+			{
+				rusherEnemy3[i].respawnPourcentage = 40;
+				//fonctions general du rusher
+				RusherParameters(rusherEnemy3[i], player);
+				// Mort du joueur en contact d'un ennemi 
+				if ((player.getPosition().x < rusherEnemy3[i].enemyCircleShape.getPosition().x + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy3[i].enemyCircleShape.getPosition().y + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy3[i].enemyCircleShape.getPosition().x - rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy3[i].enemyCircleShape.getPosition().y - rusherEnemy3[i].enemyCircleShape.getRadius()))
+				{
+					if (!rusherEnemy3[i].isDead)
+					{
+						isAlive = false;
+					}
+				}
+				//Affiche les ennemis s'ils sont pas morts
+				//pour les rusher
+				if (!rusherEnemy3[i].isDead || (rusherEnemy3[i].isReviving < rusherEnemy3[i].respawnPourcentage))
+				{
+					window.draw(rusherEnemy3[i].enemyCircleShape);
+				}
+				else
+				{
+					rusherEnemy3.erase(rusherEnemy3.begin() + i);
+					completion += 1;
+					cout << completion << "\n";
+
+					if (completion == 8) {
+
+						level3 = false;
+						level4 = true;
+						cout << "level 4 : " << level4 << "\n";
+						completion = 0;
+
+
+					}
+
+				}
+			}
+		}
 		
 
-				if (completion == 6) {
+											// LEVEL 4
 
-					level2 = false;
-					level3 = true;
-					cout << "level3 : " << level3 << "\n";
-					completion = 0;
-
-
+			if (level4 == true) {
+				
+				if (!shooterSpawned)
+				{
+					shooterEnemy = SpawnEnemyShooter(2);
+					shooterSpawned = true;
 				}
-
-			}
-
-			// LEVEL 3
-
-			if (level3 == true) {
-
 				//SHOOTER
 				for (int i = 0; i < shooterEnemy.size(); i++)
 				{
+					
+					window.draw(shooterEnemy[i].shooterShape);
 
-					ShooterParameters(shooterEnemy[i], player, shooterBullets, shooterB1);
+					ShooterParameters(shooterEnemy[i], player, shooterBullets);
 					if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
 					{
 						window.draw(shooterEnemy[i].shooterShape);
@@ -320,34 +367,34 @@ int main()
 					}
 				}
 
-				for (int i = 0; i < rusherEnemy3.size(); i++)
+				for (int i = 0; i < rusherEnemy4.size(); i++)
 				{
-
+					rusherEnemy4[i].respawnPourcentage = 50;
 					//fonctions general du rusher
-					RusherParameters(rusherEnemy3[i], player);
+					RusherParameters(rusherEnemy4[i], player);
 					// Mort du joueur en contact d'un ennemi 
-					if ((player.getPosition().x < rusherEnemy3[i].enemyCircleShape.getPosition().x + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy3[i].enemyCircleShape.getPosition().y + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy3[i].enemyCircleShape.getPosition().x - rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy3[i].enemyCircleShape.getPosition().y - rusherEnemy3[i].enemyCircleShape.getRadius()))
+					if ((player.getPosition().x < rusherEnemy4[i].enemyCircleShape.getPosition().x + rusherEnemy4[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy4[i].enemyCircleShape.getPosition().y + rusherEnemy4[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy4[i].enemyCircleShape.getPosition().x - rusherEnemy4[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy4[i].enemyCircleShape.getPosition().y - rusherEnemy4[i].enemyCircleShape.getRadius()))
 					{
-						if (!rusherEnemy3[i].isDead)
+						if (!rusherEnemy4[i].isDead)
 						{
 							isAlive = false;
 						}
 					}
 					//Affiche les ennemis s'ils sont pas morts
 					//pour les rusher
-					if (!rusherEnemy3[i].isDead || (rusherEnemy3[i].isReviving < rusherEnemy3[i].respawnPourcentage))
+					if (!rusherEnemy4[i].isDead || (rusherEnemy4[i].isReviving < rusherEnemy4[i].respawnPourcentage))
 					{
-						window.draw(rusherEnemy3[i].enemyCircleShape);
+						window.draw(rusherEnemy4[i].enemyCircleShape);
 					}
 					else
 					{
-						rusherEnemy3.erase(rusherEnemy3.begin() + i);
+						rusherEnemy4.erase(rusherEnemy4.begin() + i);
 						completion += 1;
 						cout << completion << "\n";
 
 						if (completion == 10) {
 
-							level3 = false;
+							level4 = false;
 							//level4 = true;
 							//cout << "level 2 : " << level2 << "\n";
 							completion = 0;
@@ -358,8 +405,8 @@ int main()
 					}
 				}
 			}
-			
-			
+
+
 			// Tir des projectiles 
 			for (size_t i = 0; i < bullets.size(); i++) {
 				window.draw(bullets[i].shape);
@@ -373,7 +420,7 @@ int main()
 					{
 						rusherEnemy[j].enemyCircleShape.setFillColor(Color::White);
 						rusherEnemy[j].isDead = true;
-						
+
 					}
 				}
 				for (int j = 0; j < rusherEnemy2.size(); j++)
@@ -382,7 +429,7 @@ int main()
 					{
 						rusherEnemy2[j].enemyCircleShape.setFillColor(Color::White);
 						rusherEnemy2[j].isDead = true;
-						
+
 					}
 				}
 				for (int j = 0; j < rusherEnemy3.size(); j++)
@@ -391,7 +438,17 @@ int main()
 					{
 						rusherEnemy3[j].enemyCircleShape.setFillColor(Color::White);
 						rusherEnemy3[j].isDead = true;
-						
+
+					}
+				}
+
+				for (int j = 0; j < rusherEnemy4.size(); j++)
+				{
+					if ((bullets[i].shape.getPosition().x < rusherEnemy4[j].enemyCircleShape.getPosition().x + rusherEnemy4[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy4[j].enemyCircleShape.getPosition().y + rusherEnemy4[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy4[j].enemyCircleShape.getPosition().x - rusherEnemy4[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy4[j].enemyCircleShape.getPosition().y - rusherEnemy4[j].enemyCircleShape.getRadius()))
+					{
+						rusherEnemy4[j].enemyCircleShape.setFillColor(Color::White);
+						rusherEnemy4[j].isDead = true;
+
 					}
 				}
 
@@ -408,11 +465,10 @@ int main()
 				//Suppression des projectiles en dehors de l'écran 
 				if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 					bullets.erase(bullets.begin() + i);
-					
+
 				}
 			}
 
-			
 			for (int i = 0; i < shooterBullets.size(); i++)
 			{
 				window.draw(shooterBullets[i].bulletShape);
@@ -459,35 +515,34 @@ int main()
 						shooterEnemy[j].shootCoolDown = clock() / CLOCKS_PER_SEC;
 					}
 					else
-					{
+					{				
 						shooterEnemy[j].canShoot = true;
 					}
 
 				}
 
 			}
-			
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
 				player.setPosition(0.f, player.getPosition().y);
-			
+
 			if (player.getPosition().y < 0.f)
 				player.setPosition(player.getPosition().x, 0.f);
-			
+
 			if (player.getPosition().x + player.getGlobalBounds().width > xwindow)
 				player.setPosition(xwindow - player.getGlobalBounds().width, player.getPosition().y);
-			
+
 			if (player.getPosition().y + player.getGlobalBounds().height > ywindow)
 				player.setPosition(player.getPosition().x, ywindow - player.getGlobalBounds().height);
-		window.display();
+			window.display();
 
-		// Esc pour quitter le jeu 
-		if (Keyboard::isKeyPressed(Keyboard::Key::Escape))
-			window.close();
+			// Esc pour quitter le jeu 
+			if (Keyboard::isKeyPressed(Keyboard::Key::Escape))
+				window.close();
+		}
+
+
 	}
-	
-	
-}
 
 std::vector<Enemy> SpawnEnemyRusher(int number)
 {

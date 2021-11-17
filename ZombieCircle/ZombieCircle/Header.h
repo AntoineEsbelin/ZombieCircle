@@ -66,6 +66,8 @@ struct Shooter
 	float shootCoolDown = 0.f;
 };
 
+
+
 struct shooterBullet
 {
 	CircleShape bulletShape;
