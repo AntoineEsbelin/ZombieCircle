@@ -35,11 +35,11 @@ int main()
 
 	// Projectiles
 	Bullet b1;
-	Bullet shooterB1;
+	shooterBullet shooterB1;
 	
 
 	vector<Bullet> bullets;
-	vector<Bullet> shooterBullets;
+	vector<shooterBullet> shooterBullets;
 
 	//Munition
 	int maxammo = 25;
@@ -56,7 +56,7 @@ int main()
 	string ammostri = to_string(currentammo);
 	currentammotext.setString(ammostri);
 	currentammotext.setFillColor(Color::White);
-	currentammotext.setPosition(player.getPosition().x,  player.getPosition().y);
+	currentammotext.setPosition(/*xwindow - 100*/player.getPosition().x, /*ywindow - 100*/ player.getPosition().y);
 
 	Text maxammotext;
 	string maxammostri = to_string(maxammo);
@@ -79,6 +79,10 @@ int main()
 
 	bool isAlive = true;
 
+	// Enemies
+	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
+	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
+
 	// Background
 
 	RectangleShape bg(Vector2f(1200, 900));
@@ -94,19 +98,7 @@ int main()
 	bool level2 = false;
 	bool level3 = false;
 
-	// Enemies
-		// rushers
-	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
-	std::vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
-	std::vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
-
-		// shooters
-
-	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
-
 	
-
-	Clock clocked;
 
 	while (window.isOpen())
 	{
@@ -139,6 +131,8 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 		
+		
+
 		//D�placement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q) && isAlive == true)
 			player.move(-5.f, 0.f);
@@ -304,54 +298,14 @@ int main()
 				for (int i = 0; i < shooterEnemy.size(); i++)
 				{
 
-					ShooterParameters(shooterEnemy[i], player, shooterBullets, shooterB1);
-					if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
-					{
-						window.draw(shooterEnemy[i].shooterShape);
-					}
-					else
-					{
-						shooterEnemy.erase(shooterEnemy.begin() + i);
-						completion += 1;
-					}
-				}
-
-				for (int i = 0; i < rusherEnemy3.size(); i++)
+				ShooterParameters(shooterEnemy[i], player, shooterBullets, shooterB1);
+				if (!shooterEnemy[i].isDead || (shooterEnemy[i].isReviving < shooterEnemy[i].respawnPourcentage))
 				{
-
-					//fonctions general du rusher
-					RusherParameters(rusherEnemy3[i], player);
-					// Mort du joueur en contact d'un ennemi 
-					if ((player.getPosition().x < rusherEnemy3[i].enemyCircleShape.getPosition().x + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy3[i].enemyCircleShape.getPosition().y + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy3[i].enemyCircleShape.getPosition().x - rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy3[i].enemyCircleShape.getPosition().y - rusherEnemy3[i].enemyCircleShape.getRadius()))
-					{
-						if (!rusherEnemy3[i].isDead)
-						{
-							isAlive = false;
-						}
-					}
-					//Affiche les ennemis s'ils sont pas morts
-					//pour les rusher
-					if (!rusherEnemy3[i].isDead || (rusherEnemy3[i].isReviving < rusherEnemy3[i].respawnPourcentage))
-					{
-						window.draw(rusherEnemy3[i].enemyCircleShape);
-					}
-					else
-					{
-						rusherEnemy3.erase(rusherEnemy3.begin() + i);
-						completion += 1;
-						cout << completion << "\n";
-
-						if (completion == 10) {
-
-							level3 = false;
-							//level4 = true;
-							//cout << "level 2 : " << level2 << "\n";
-							completion = 0;
-
-
-						}
-
-					}
+					window.draw(shooterEnemy[i].shooterShape);
+				}
+				else
+				{
+					shooterEnemy.erase(shooterEnemy.begin() + i);
 				}
 			}
 			
@@ -408,24 +362,41 @@ int main()
 				}
 			}
 
-
 			//tir des shooter
-			/*for (int j = 0; j < shooterEnemy.size(); j++)
+			for (int j = 0; j < shooterEnemy.size(); j++)
 			{
 				if (shooterEnemy[j].canShoot)
 				{
-					shooterEnemy[j].shooted = clock() / (float)CLOCKS_PER_SEC;
-					shooterB1.shape.setPosition(shooterEnemy[j].shooterShape.getPosition());
-					shooterB1.currVelocity.x = player.getPosition().x + player.getRadius();
-					shooterB1.currVelocity.y = player.getPosition().y + player.getRadius();
-					shooterBullets.push_back(Bullet(shooterB1));
+					shooterEnemy[j].shooted = clock() / CLOCKS_PER_SEC;
+					shooterB1.bulletShape.setRadius(5.f);
+					shooterB1.bulletShape.setFillColor(Color::Blue);
+					shooterB1.bulletShape.setPosition(shooterEnemy[j].shooterShape.getPosition());
+					if (player.getPosition().x < shooterEnemy[j].shooterShape.getPosition().x)
+					{
+						shooterB1.playerPosition.x = (player.getPosition().x + 0.01f) - shooterEnemy[j].shooterShape.getPosition().x;
+					}
+					else
+					{
+
+						shooterB1.playerPosition.x = -(shooterEnemy[j].shooterShape.getPosition().x - (player.getPosition().x + 0.01f));
+					}
+					if (player.getPosition().y < shooterEnemy[j].shooterShape.getPosition().y)
+					{
+						shooterB1.playerPosition.y = (player.getPosition().y + 0.01f) - shooterEnemy[j].shooterShape.getPosition().y;
+					}
+					else
+					{
+						shooterB1.playerPosition.y = -(shooterEnemy[j].shooterShape.getPosition().y - (player.getPosition().y + 0.01f));
+					}
+					shooterBullets.push_back(shooterBullet(shooterB1));
 					shooterEnemy[j].canShoot = false;
 				}
-				else if (!shooterEnemy[j].canShoot)
+				else
 				{
-					if (shooterEnemy[j].coolDown < shooterEnemy[j].shootMaxCoolDown)
+					shooterEnemy[j].shootMaxCoolDown = shooterEnemy[j].shooted + 2.f;
+					if (shooterEnemy[j].shootCoolDown < shooterEnemy[j].shootMaxCoolDown)
 					{
-						shooterEnemy[j].coolDown = clock() / (float)CLOCKS_PER_SEC;
+						shooterEnemy[j].shootCoolDown = clock() / CLOCKS_PER_SEC;
 					}
 					else
 					{
@@ -444,7 +415,6 @@ int main()
 					isAlive = false;
 				}
 			}*/
-
 
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
@@ -543,7 +513,7 @@ void RusherParameters(Enemy& rusher, CircleShape& player)
 
 }
 
-void ShooterParameters(Shooter& shooter, CircleShape& player, vector<Bullet>& shooterBullets, Bullet &shooterB1)
+void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBullet>& shooterBullets)
 {
 	if (!shooter.isDead)
 	{

@@ -66,11 +66,20 @@ struct Shooter
 	float shootCoolDown = 0.f;
 };
 
+
+
+struct shooterBullet
+{
+	CircleShape bulletShape;
+	float bulletSpeed = .05f;
+	Vector2f playerPosition;
+};
+
 void Reload(int& currentammo, int& maxammo);
 std::vector<Enemy> SpawnEnemyRusher(int number);
 std::vector<Shooter> SpawnEnemyShooter(int number);
 void RusherParameters(Enemy& rusher, CircleShape& player);
-void ShooterParameters(Shooter& shooter, CircleShape& player, vector<Bullet>& shooterBullets, Bullet& shooterB1);
+void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBullet>& shooterBullets);
 void Reload(int& currentammo, int& maxammo);
 void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> ennemies);
 
