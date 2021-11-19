@@ -101,8 +101,8 @@ public:
 			this->isDead = true;
 		}
 		bossLife -= damage;
+		cout << bossLife << endl;
 	}
-
 };
 
 void Reload(int& currentammo, int& maxammo);
