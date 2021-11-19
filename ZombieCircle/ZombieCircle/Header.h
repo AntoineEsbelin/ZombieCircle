@@ -26,7 +26,7 @@ struct Enemy
 {
 	bool isDead = false;
 	CircleShape enemyCircleShape;
-	float rusherSpeed = 2; // rand() % 4 + 1;
+	float rusherSpeed = rand() % 3 + 2;
 	float timeOfDeath = 0.f;
 	float coolDown = timeOfDeath + timeBeforeRevive;
 	float timeBeforeRevive = 2.f;

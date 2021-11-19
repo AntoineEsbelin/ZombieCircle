@@ -15,12 +15,13 @@ int main()
 {	
 	// Texte
 
+	string numb = "level : 1";
 	sf::Font arial;
 	arial.loadFromFile(getAssetsPath() + "\\arial.ttf");
 	sf::Text text;
-	text.setFont(arial);
-	text.setString("Level: ");
+	text.setFont(arial);	
 	text.setCharacterSize(40);
+	text.setPosition(20.f, 10.f);
 	
 
 	srand(time(NULL));
@@ -71,12 +72,17 @@ int main()
 	Text currentammotext;
 	string ammostri = to_string(currentammo);
 	currentammotext.setString(ammostri);
+	currentammotext.setFont(arial);
 	currentammotext.setFillColor(Color::White);
-	currentammotext.setPosition(player.getPosition().x, player.getPosition().y);
+	currentammotext.setCharacterSize(25);
+	currentammotext.setPosition(500.f, 10.f);
 
 	Text maxammotext;
 	string maxammostri = to_string(maxammo);
 	maxammotext.setString(maxammostri);
+	maxammotext.setFont(arial);
+	maxammotext.setCharacterSize(25);
+	maxammotext.setPosition(1000.f, 10.f);
 
 	CircleShape ammoBox;
 	ammoBox.setFillColor(Color::Magenta);
@@ -96,11 +102,12 @@ int main()
 
 	bool shooterSpawned = false;
 
-	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
-	std::vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
-	std::vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
-	std::vector<Enemy> rusherEnemy4 = SpawnEnemyRusher(8);
-	std::vector<Shooter> shooterEnemy;
+	vector<Enemy> rusherEnemy = SpawnEnemyRusher(4);
+	vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
+	vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
+	vector<Enemy> rusherEnemy4 = SpawnEnemyRusher(8);
+	vector<Shooter> shooterEnemy;
+
 
 	// Background
 
@@ -118,11 +125,10 @@ int main()
 	bool level2 = false;
 	bool level3 = false;
 	bool level4 = false;
+	bool level5 = false;
 
-
-
-
-
+	// Fenêtre ouverte par SFML
+	
 	while (window.isOpen())
 	{
 
@@ -154,17 +160,17 @@ int main()
 		aimDir = mousePosWindow - playerCenter;
 		aimDirNorm = aimDir / static_cast<float>(sqrt(pow(aimDir.x, 2) + pow(aimDir.y, 2)));
 
-
+		
 
 		//D�placement du joueur 
 		if (Keyboard::isKeyPressed(Keyboard::Q) && isAlive == true)
-			player.move(-5.f, 0.f);
+			player.move(-7.f, 0.f);
 		if (Keyboard::isKeyPressed(Keyboard::D) && isAlive == true)
-			player.move(5.f, 0.f);
+			player.move(7.f, 0.f);
 		if (Keyboard::isKeyPressed(Keyboard::Z) && isAlive == true)
-			player.move(0.f, -5.f);
+			player.move(0.f, -7.f);
 		if (Keyboard::isKeyPressed(Keyboard::S) && isAlive == true)
-			player.move(0.f, 5.f);
+			player.move(0.f, 7.f);
 
 		// Mort du joueur
 
@@ -183,7 +189,7 @@ int main()
 
 				canAttack = false;
 				cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
-
+				ammostri = to_string(currentammo);
 			}
 
 		}
@@ -196,7 +202,7 @@ int main()
 		else
 			attackCooldown += 0.5f;
 
-
+		
 		// Cooldown reload
 
 		if (rCooldown >= rCooldownMax) {
@@ -212,18 +218,18 @@ int main()
 		{
 
 			Reload(currentammo, maxammo);
-			canR = false;
-
-
+			canR = false;			
+			maxammostri = to_string(maxammo);
+			ammostri = to_string(currentammo);
+			
 		}
 		window.clear();
-
+		
+												// Affichage de différents éléments 
 		window.draw(bg);		
 		window.draw(text);
 		window.draw(player);
-		window.draw(currentammotext);
-
-
+		
 		//boucle pour chaque ennemis
 			//RUSHER
 
@@ -236,7 +242,10 @@ int main()
 				//fonctions general du rusher
 				RusherParameters(rusherEnemy[i], player);
 				// Mort du joueur en contact d'un ennemi 
-				if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
+				if ((player.getPosition().x < rusherEnemy[i].enemyCircleShape.getPosition().x + rusherEnemy[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().y < rusherEnemy[i].enemyCircleShape.getPosition().y + rusherEnemy[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().x > rusherEnemy[i].enemyCircleShape.getPosition().x - rusherEnemy[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().y > rusherEnemy[i].enemyCircleShape.getPosition().y - rusherEnemy[i].enemyCircleShape.getRadius()))
 				{
 					if (!rusherEnemy[i].isDead)
 					{
@@ -250,16 +259,16 @@ int main()
 					window.draw(rusherEnemy[i].enemyCircleShape);
 				}
 				else
-				{
+				{				
 					rusherEnemy.erase(rusherEnemy.begin() + i);
 					completion += 1;
 					cout << completion << "\n";
-					Ammo(window, currentammo, ammoBox, rusherEnemy);
+					Ammo(window, currentammo, ammoBox, rusherEnemy);					
 
 				}
 			}
 
-			if (completion == 3) {
+			if (completion == 4) {
 
 				level1 = false;
 				level2 = true;
@@ -273,12 +282,17 @@ int main()
 														// LEVEL 2
 
 		if (level2 == true) {
+
+			numb = "level : 2";
 			for (int i = 0; i < rusherEnemy2.size(); i++)
 			{
 				//fonctions general du rusher
 				RusherParameters(rusherEnemy2[i], player);
 				// Mort du joueur en contact d'un ennemi 
-				if ((player.getPosition().x < rusherEnemy2[i].enemyCircleShape.getPosition().x + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy2[i].enemyCircleShape.getPosition().y + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy2[i].enemyCircleShape.getPosition().x - rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy2[i].enemyCircleShape.getPosition().y - rusherEnemy2[i].enemyCircleShape.getRadius()))
+				if ((player.getPosition().x < rusherEnemy2[i].enemyCircleShape.getPosition().x + rusherEnemy2[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().y < rusherEnemy2[i].enemyCircleShape.getPosition().y + rusherEnemy2[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().x > rusherEnemy2[i].enemyCircleShape.getPosition().x - rusherEnemy2[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().y > rusherEnemy2[i].enemyCircleShape.getPosition().y - rusherEnemy2[i].enemyCircleShape.getRadius()))
 				{
 					if (!rusherEnemy2[i].isDead)
 					{
@@ -296,6 +310,7 @@ int main()
 					rusherEnemy2.erase(rusherEnemy2.begin() + i);
 					completion += 1;
 					cout << completion << "\n";
+					Ammo(window, currentammo, ammoBox, rusherEnemy);
 
 				}
 			}
@@ -316,14 +331,19 @@ int main()
 													// LEVEL 3
 
 		if (level3 == true) {
-			
+			numb = "level : 3";
+
 			for (int i = 0; i < rusherEnemy3.size(); i++)
 			{
-				rusherEnemy3[i].respawnPourcentage = 40;
+				rusherEnemy3[i].rusherSpeed = rand() % 3 + 3;
+				rusherEnemy3[i].respawnPourcentage = 50;
 				//fonctions general du rusher
 				RusherParameters(rusherEnemy3[i], player);
 				// Mort du joueur en contact d'un ennemi 
-				if ((player.getPosition().x < rusherEnemy3[i].enemyCircleShape.getPosition().x + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy3[i].enemyCircleShape.getPosition().y + rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy3[i].enemyCircleShape.getPosition().x - rusherEnemy3[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy3[i].enemyCircleShape.getPosition().y - rusherEnemy3[i].enemyCircleShape.getRadius()))
+				if ((player.getPosition().x < rusherEnemy3[i].enemyCircleShape.getPosition().x + rusherEnemy3[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().y < rusherEnemy3[i].enemyCircleShape.getPosition().y + rusherEnemy3[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().x > rusherEnemy3[i].enemyCircleShape.getPosition().x - rusherEnemy3[i].enemyCircleShape.getRadius()) 
+					&& (player.getPosition().y > rusherEnemy3[i].enemyCircleShape.getPosition().y - rusherEnemy3[i].enemyCircleShape.getRadius()))
 				{
 					if (!rusherEnemy3[i].isDead)
 					{
@@ -341,6 +361,7 @@ int main()
 					rusherEnemy3.erase(rusherEnemy3.begin() + i);
 					completion += 1;
 					cout << completion << "\n";
+					Ammo(window, currentammo, ammoBox, rusherEnemy);
 
 					if (completion == 8) {
 
@@ -348,6 +369,7 @@ int main()
 						level4 = true;
 						cout << "level 4 : " << level4 << "\n";
 						completion = 0;
+
 
 
 					}
@@ -360,7 +382,7 @@ int main()
 											// LEVEL 4
 
 		if (level4 == true) {
-				
+			numb = "level : 4";
 			if (!shooterSpawned)
 			{
 					shooterEnemy = SpawnEnemyShooter(2);
@@ -386,11 +408,15 @@ int main()
 
 				for (int i = 0; i < rusherEnemy4.size(); i++)
 				{
+					rusherEnemy4[i].rusherSpeed = rand() % 3 + 3;
 					rusherEnemy4[i].respawnPourcentage = 50;
 					//fonctions general du rusher
 					RusherParameters(rusherEnemy4[i], player);
 					// Mort du joueur en contact d'un ennemi 
-					if ((player.getPosition().x < rusherEnemy4[i].enemyCircleShape.getPosition().x + rusherEnemy4[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy4[i].enemyCircleShape.getPosition().y + rusherEnemy4[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy4[i].enemyCircleShape.getPosition().x - rusherEnemy4[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy4[i].enemyCircleShape.getPosition().y - rusherEnemy4[i].enemyCircleShape.getRadius()))
+					if ((player.getPosition().x < rusherEnemy4[i].enemyCircleShape.getPosition().x + rusherEnemy4[i].enemyCircleShape.getRadius()) 
+						&& (player.getPosition().y < rusherEnemy4[i].enemyCircleShape.getPosition().y + rusherEnemy4[i].enemyCircleShape.getRadius())
+						&& (player.getPosition().x > rusherEnemy4[i].enemyCircleShape.getPosition().x - rusherEnemy4[i].enemyCircleShape.getRadius())
+						&& (player.getPosition().y > rusherEnemy4[i].enemyCircleShape.getPosition().y - rusherEnemy4[i].enemyCircleShape.getRadius()))
 					{
 						if (!rusherEnemy4[i].isDead)
 						{
@@ -408,10 +434,12 @@ int main()
 						rusherEnemy4.erase(rusherEnemy4.begin() + i);
 						completion += 1;
 						cout << completion << "\n";
+						Ammo(window, currentammo, ammoBox, rusherEnemy);
 
 						if (completion == 10) {
 
-							level4 = false;							
+							level4 = false;
+							level5 = true;
 							completion = 0;
 
 
@@ -421,17 +449,20 @@ int main()
 				}
 			}
 
-
 			// Tir des projectiles 
 			for (size_t i = 0; i < bullets.size(); i++) {
 				window.draw(bullets[i].shape);
 				bullets[i].shape.move(bullets[i].currVelocity);
 
 				// Mort des ennemis 
-				//RUSHER
+				// 
+				//RUSHERS
 				for (int j = 0; j < rusherEnemy.size(); j++)
 				{
-					if ((bullets[i].shape.getPosition().x < rusherEnemy[j].enemyCircleShape.getPosition().x + rusherEnemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy[j].enemyCircleShape.getPosition().y + rusherEnemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy[j].enemyCircleShape.getPosition().x - rusherEnemy[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy[j].enemyCircleShape.getPosition().y - rusherEnemy[j].enemyCircleShape.getRadius()))
+					if ((bullets[i].shape.getPosition().x < rusherEnemy[j].enemyCircleShape.getPosition().x + rusherEnemy[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y < rusherEnemy[j].enemyCircleShape.getPosition().y + rusherEnemy[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().x > rusherEnemy[j].enemyCircleShape.getPosition().x - rusherEnemy[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y > rusherEnemy[j].enemyCircleShape.getPosition().y - rusherEnemy[j].enemyCircleShape.getRadius()))
 					{
 						rusherEnemy[j].enemyCircleShape.setFillColor(Color::White);
 						rusherEnemy[j].isDead = true;
@@ -440,8 +471,12 @@ int main()
 				}
 				for (int j = 0; j < rusherEnemy2.size(); j++)
 				{
-					if ((bullets[i].shape.getPosition().x < rusherEnemy2[j].enemyCircleShape.getPosition().x + rusherEnemy2[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy2[j].enemyCircleShape.getPosition().y + rusherEnemy2[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy2[j].enemyCircleShape.getPosition().x - rusherEnemy2[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy2[j].enemyCircleShape.getPosition().y - rusherEnemy2[j].enemyCircleShape.getRadius()))
+					if ((bullets[i].shape.getPosition().x < rusherEnemy2[j].enemyCircleShape.getPosition().x + rusherEnemy2[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y < rusherEnemy2[j].enemyCircleShape.getPosition().y + rusherEnemy2[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().x > rusherEnemy2[j].enemyCircleShape.getPosition().x - rusherEnemy2[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y > rusherEnemy2[j].enemyCircleShape.getPosition().y - rusherEnemy2[j].enemyCircleShape.getRadius()))
 					{
+
 						rusherEnemy2[j].enemyCircleShape.setFillColor(Color::White);
 						rusherEnemy2[j].isDead = true;
 
@@ -449,7 +484,10 @@ int main()
 				}
 				for (int j = 0; j < rusherEnemy3.size(); j++)
 				{
-					if ((bullets[i].shape.getPosition().x < rusherEnemy3[j].enemyCircleShape.getPosition().x + rusherEnemy3[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy3[j].enemyCircleShape.getPosition().y + rusherEnemy3[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy3[j].enemyCircleShape.getPosition().x - rusherEnemy3[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy3[j].enemyCircleShape.getPosition().y - rusherEnemy3[j].enemyCircleShape.getRadius()))
+					if ((bullets[i].shape.getPosition().x < rusherEnemy3[j].enemyCircleShape.getPosition().x + rusherEnemy3[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y < rusherEnemy3[j].enemyCircleShape.getPosition().y + rusherEnemy3[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().x > rusherEnemy3[j].enemyCircleShape.getPosition().x - rusherEnemy3[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y > rusherEnemy3[j].enemyCircleShape.getPosition().y - rusherEnemy3[j].enemyCircleShape.getRadius()))
 					{
 						rusherEnemy3[j].enemyCircleShape.setFillColor(Color::White);
 						rusherEnemy3[j].isDead = true;
@@ -459,24 +497,31 @@ int main()
 
 				for (int j = 0; j < rusherEnemy4.size(); j++)
 				{
-					if ((bullets[i].shape.getPosition().x < rusherEnemy4[j].enemyCircleShape.getPosition().x + rusherEnemy4[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y < rusherEnemy4[j].enemyCircleShape.getPosition().y + rusherEnemy4[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().x > rusherEnemy4[j].enemyCircleShape.getPosition().x - rusherEnemy4[j].enemyCircleShape.getRadius()) && (bullets[i].shape.getPosition().y > rusherEnemy4[j].enemyCircleShape.getPosition().y - rusherEnemy4[j].enemyCircleShape.getRadius()))
+					if ((bullets[i].shape.getPosition().x < rusherEnemy4[j].enemyCircleShape.getPosition().x + rusherEnemy4[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y < rusherEnemy4[j].enemyCircleShape.getPosition().y + rusherEnemy4[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().x > rusherEnemy4[j].enemyCircleShape.getPosition().x - rusherEnemy4[j].enemyCircleShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y > rusherEnemy4[j].enemyCircleShape.getPosition().y - rusherEnemy4[j].enemyCircleShape.getRadius()))
 					{
 						rusherEnemy4[j].enemyCircleShape.setFillColor(Color::White);
 						rusherEnemy4[j].isDead = true;
 
 					}
 				}
-
+				
 				//SHOOTER
 				for (int j = 0; j < shooterEnemy.size(); j++)
 				{
-					if ((bullets[i].shape.getPosition().x < shooterEnemy[j].shooterShape.getPosition().x + shooterEnemy[j].shooterShape.getRadius()) && (bullets[i].shape.getPosition().y < shooterEnemy[j].shooterShape.getPosition().y + shooterEnemy[j].shooterShape.getRadius()) && (bullets[i].shape.getPosition().x > shooterEnemy[j].shooterShape.getPosition().x - shooterEnemy[j].shooterShape.getRadius()) && (bullets[i].shape.getPosition().y > shooterEnemy[j].shooterShape.getPosition().y - shooterEnemy[j].shooterShape.getRadius()))
+					if ((bullets[i].shape.getPosition().x < shooterEnemy[j].shooterShape.getPosition().x + shooterEnemy[j].shooterShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y < shooterEnemy[j].shooterShape.getPosition().y + shooterEnemy[j].shooterShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().x > shooterEnemy[j].shooterShape.getPosition().x - shooterEnemy[j].shooterShape.getRadius()) 
+						&& (bullets[i].shape.getPosition().y > shooterEnemy[j].shooterShape.getPosition().y - shooterEnemy[j].shooterShape.getRadius()))
 					{
 						shooterEnemy[j].shooterShape.setFillColor(Color::White);
 						shooterEnemy[j].isDead = true;
 
 					}
 				}
+
 				//Suppression des projectiles en dehors de l'écran 
 				if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 					bullets.erase(bullets.begin() + i);
@@ -484,11 +529,15 @@ int main()
 				}
 			}
 
+			//Deplacement des tirs des ennemis shooter
 			for (int i = 0; i < shooterBullets.size(); i++)
 			{
 				window.draw(shooterBullets[i].bulletShape);
 				shooterBullets[i].bulletShape.move(shooterBullets[i].playerPosition * shooterBullets[i].bulletSpeed);
-				if ((player.getPosition().x < shooterBullets[i].bulletShape.getPosition().x + shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().y < shooterBullets[i].bulletShape.getPosition().y + shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().x > shooterBullets[i].bulletShape.getPosition().x - shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().y > shooterBullets[i].bulletShape.getPosition().y - shooterBullets[i].bulletShape.getRadius()))
+				if ((player.getPosition().x < shooterBullets[i].bulletShape.getPosition().x + shooterBullets[i].bulletShape.getRadius()) 
+					&& (player.getPosition().y < shooterBullets[i].bulletShape.getPosition().y + shooterBullets[i].bulletShape.getRadius()) 
+					&& (player.getPosition().x > shooterBullets[i].bulletShape.getPosition().x - shooterBullets[i].bulletShape.getRadius()) 
+					&& (player.getPosition().y > shooterBullets[i].bulletShape.getPosition().y - shooterBullets[i].bulletShape.getRadius()))
 				{
 					isAlive = false;
 				}
@@ -537,7 +586,7 @@ int main()
 				}
 
 			}
-
+	
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
 				player.setPosition(0.f, player.getPosition().y);
@@ -550,6 +599,14 @@ int main()
 
 			if (player.getPosition().y + player.getGlobalBounds().height > ywindow)
 				player.setPosition(player.getPosition().x, ywindow - player.getGlobalBounds().height);
+
+			// Le nombre de niveau
+			text.setString(numb);
+			currentammotext.setString("Current ammo: " + ammostri);
+			maxammotext.setString("Max ammo: " + maxammostri);
+			window.draw(maxammotext);
+			window.draw(currentammotext);
+
 			window.display();
 
 			// Esc pour quitter le jeu 
@@ -613,7 +670,7 @@ string getAssetsPath() {
 
 												// FONCTIONS
 
-
+// Fct pour l'ennemi rusher
 void RusherParameters(Enemy& rusher, CircleShape& player)
 {
 	if (!rusher.isDead)
@@ -659,12 +716,16 @@ void RusherParameters(Enemy& rusher, CircleShape& player)
 
 }
 
+// Fct pour l'ennemi shooter
 void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBullet>& shooterBullets)
 {
 	if (!shooter.isDead)
 	{
 		//mouvements des ennemis
-		if (!((shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 25)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 25)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 25)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 25))))
+		if (!((shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 25)) 
+			&& (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 25)) 
+			&& (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 25)) 
+			&& (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 25))))
 		{
 			if ((shooter.shooterShape.getPosition().x > player.getPosition().x))
 			{
@@ -721,7 +782,7 @@ void Reload(int& currentammo, int& maxammo)
 	maxammo -= 5;
 
 	cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
-
+	
 
 }
 
