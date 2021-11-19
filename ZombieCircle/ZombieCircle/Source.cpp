@@ -20,7 +20,7 @@ int main()
 	float xwindow = window.getSize().x;
 	float ywindow = window.getSize().y;
 
-
+	
 	// Player
 
 	CircleShape player;
@@ -62,9 +62,7 @@ int main()
 	string maxammostri = to_string(maxammo);
 	maxammotext.setString(maxammostri);
 
-	CircleShape ammoBox;
-	ammoBox.setFillColor(Color::Magenta);
-	ammoBox.setRadius(20.f);
+	
 
 	
 	
@@ -104,7 +102,16 @@ int main()
 
 	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
 
+	//Ammo
+	Ammo ammo;
+	std::vector<Ammo> ammoBox;
+	int ammoSpawnPourcent = 25;
 	
+	/*ammoBox.push_back(ammo);*/
+	
+	CircleShape zebi;
+	zebi.setFillColor(Color::Red);
+	zebi.setRadius(20);
 
 	Clock clocked;
 
@@ -204,7 +211,9 @@ int main()
 			window.draw(bg);
 			
 			window.draw(player);
-			window.draw(currentammotext);
+			
+			
+			
 
 			
 			//boucle pour chaque ennemis
@@ -234,12 +243,18 @@ int main()
 					}
 					else
 					{
+						int ammoIsSpawning = rand() % 100;
+						
+						if (ammoIsSpawning < ammoSpawnPourcent)
+						{
+							CreateAmmo(window, currentammo, rusherEnemy, ammoBox);
+						}
+						
 						rusherEnemy.erase(rusherEnemy.begin() + i);
 						completion += 1;
 						cout << completion << "\n";
-						Ammo(window, currentammo, ammoBox, rusherEnemy);
-
 					}
+
 				}
 
 				if (completion == 3) {
@@ -261,7 +276,10 @@ int main()
 					//fonctions general du rusher
 					RusherParameters(rusherEnemy2[i], player);
 					// Mort du joueur en contact d'un ennemi 
-					if ((player.getPosition().x < rusherEnemy2[i].enemyCircleShape.getPosition().x + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y < rusherEnemy2[i].enemyCircleShape.getPosition().y + rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().x > rusherEnemy2[i].enemyCircleShape.getPosition().x - rusherEnemy2[i].enemyCircleShape.getRadius()) && (player.getPosition().y > rusherEnemy2[i].enemyCircleShape.getPosition().y - rusherEnemy2[i].enemyCircleShape.getRadius()))
+					if ((player.getPosition().x < rusherEnemy2[i].enemyCircleShape.getPosition().x + rusherEnemy2[i].enemyCircleShape.getRadius()) 
+						&& (player.getPosition().y < rusherEnemy2[i].enemyCircleShape.getPosition().y + rusherEnemy2[i].enemyCircleShape.getRadius()) 
+						&& (player.getPosition().x > rusherEnemy2[i].enemyCircleShape.getPosition().x - rusherEnemy2[i].enemyCircleShape.getRadius()) 
+						&& (player.getPosition().y > rusherEnemy2[i].enemyCircleShape.getPosition().y - rusherEnemy2[i].enemyCircleShape.getRadius()))
 					{
 						if (!rusherEnemy2[i].isDead)
 						{
@@ -276,6 +294,11 @@ int main()
 					}
 					else
 					{
+						int ammoIsSpawning = rand() % 100;
+						if (ammoIsSpawning < ammoSpawnPourcent)
+						{
+							CreateAmmo(window, currentammo, rusherEnemy2, ammoBox);
+						}
 						rusherEnemy2.erase(rusherEnemy2.begin() + i);
 						completion += 1;
 						cout << completion << "\n";
@@ -311,6 +334,7 @@ int main()
 					}
 					else
 					{
+						
 						shooterEnemy.erase(shooterEnemy.begin() + i);
 						completion += 1;
 					}
@@ -337,6 +361,11 @@ int main()
 					}
 					else
 					{
+						int ammoIsSpawning = rand() % 100;
+						if (ammoIsSpawning < ammoSpawnPourcent)
+						{
+							CreateAmmo(window, currentammo, rusherEnemy3, ammoBox);
+						}
 						rusherEnemy3.erase(rusherEnemy3.begin() + i);
 						completion += 1;
 						cout << completion << "\n";
@@ -408,6 +437,23 @@ int main()
 				}
 			}
 
+			for (Ammo& amo : ammoBox)
+			{
+				if ((player.getPosition().x < amo.ammoShape.getPosition().x + amo.ammoShape.getSize().x)
+					&& (player.getPosition().y < amo.ammoShape.getPosition().y + amo.ammoShape.getSize().y)
+					&& (player.getPosition().x > amo.ammoShape.getPosition().x - amo.ammoShape.getSize().x)
+					&& (player.getPosition().y > amo.ammoShape.getPosition().y - amo.ammoShape.getSize().y))
+				{
+					amo.isPicked = true;
+					if (amo.isPicked == true)
+					{
+						int i = ammoBox.size() - 1;
+						maxammo += 5;
+						amo.isPicked = false;
+						ammoBox.erase(ammoBox.begin() + i);	
+					}
+				}
+			}
 
 			//tir des shooter
 			/*for (int j = 0; j < shooterEnemy.size(); j++)
@@ -445,6 +491,7 @@ int main()
 				}
 			}*/
 
+			
 
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
@@ -458,6 +505,12 @@ int main()
 			
 			if (player.getPosition().y + player.getGlobalBounds().height > ywindow)
 				player.setPosition(player.getPosition().x, ywindow - player.getGlobalBounds().height);
+
+
+			for (Ammo& amo : ammoBox) 
+			{
+				window.draw(amo.ammoShape);
+			}
 		window.display();
 
 		// Esc pour quitter le jeu 
@@ -614,12 +667,20 @@ void Reload(int& currentammo, int& maxammo)
 // variable etant pour le shooter
 //if(shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 2))
 
-void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> enemies) {
+void CreateAmmo(RenderWindow& window, int& currentAmmo, vector<Enemy>& enemies, vector<Ammo>& ammoBox) {
 
-	for (int i = 0; i < enemies.size(); i++)
-	{
-		ammoBox.setPosition(enemies[i].enemyCircleShape.getPosition().x, enemies[i].enemyCircleShape.getPosition().y);
-	}
-	currentAmmo += 20;
-	window.draw(ammoBox);
+	Ammo ammo;
+	ammoBox.push_back(ammo);
+	int i = ammoBox.size() - 1;
+	int j = enemies.size() - 1;
+
+	int ammoBoxPosX = enemies[j].enemyCircleShape.getPosition().x;
+	int ammoBoxPosY = enemies[j].enemyCircleShape.getPosition().y;
+
+	ammoBox[i].ammoShape.setSize(Vector2f(20, 15));
+	ammoBox[i].ammoShape.setFillColor(Color::Blue);
+	ammoBox[i].ammoShape.setPosition(ammoBoxPosX, ammoBoxPosY);	
+
+	cout << "aapparu" << endl;
+	return;
 }
