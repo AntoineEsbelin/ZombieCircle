@@ -20,6 +20,8 @@ public:
 	}
 };
 
+
+
 // Struct enemi zombie de base ( cours et pourcentae de chance de revivre )
 
 struct Enemy
@@ -75,6 +77,34 @@ struct shooterBullet
 	Vector2f playerPosition;
 };
 
+class Boss {
+
+private:
+	int bossLife = 50;
+public:
+	CircleShape bossShape;
+	CircleShape bulletSpawnerPosition[8];
+	bool isDead = false;
+	bool hasAppeared = false;
+	vector<shooterBullet> bossBullets;
+	
+	float bossBulletCooldown;
+	float bossBulletShooted;
+	float speedSpawningBullet = .2f;
+	bool hasShooted = false;
+	bool damaged = false;
+
+	void BossDamaged(int damage)
+	{
+		if (bossLife <= 0)
+		{
+			this->isDead = true;
+		}
+		bossLife -= damage;
+	}
+
+};
+
 void Reload(int& currentammo, int& maxammo);
 std::vector<Enemy> SpawnEnemyRusher(int number);
 std::vector<Shooter> SpawnEnemyShooter(int number);
@@ -82,5 +112,5 @@ void RusherParameters(Enemy& rusher, CircleShape& player);
 void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBullet>& shooterBullets);
 void Reload(int& currentammo, int& maxammo);
 void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> ennemies);
-
+void BossParameter(Boss& boss, shooterBullet& bBoss);
 
