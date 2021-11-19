@@ -59,7 +59,7 @@ int main()
 	//Munition
 
 	int maxammo = 25;
-	int currentammo = 100;
+	int currentammo = 5;
 	float reloadtime = 1.f;
 	cout << "Ammo : " << currentammo << endl;
 
@@ -799,6 +799,6 @@ void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<E
 	{
 		ammoBox.setPosition(enemies[i].enemyCircleShape.getPosition().x, enemies[i].enemyCircleShape.getPosition().y);
 	}
-	currentAmmo += 20;
+	currentAmmo += 3;
 	window.draw(ammoBox);
 }
