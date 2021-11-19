@@ -51,6 +51,7 @@ int main()
 
 	Bullet b1;
 	shooterBullet shooterB1;
+	shooterBullet bBoss;
 
 
 	vector<Bullet> bullets;
@@ -88,6 +89,10 @@ int main()
 	ammoBox.setFillColor(Color::Magenta);
 	ammoBox.setRadius(20.f);
 
+	
+
+
+
 	//Cooldown
 
 	bool canAttack = true;
@@ -102,13 +107,15 @@ int main()
 
 	bool shooterSpawned = false;
 
-	vector<Enemy> rusherEnemy = SpawnEnemyRusher(4);
-	vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
-	vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
-	vector<Enemy> rusherEnemy4 = SpawnEnemyRusher(8);
-	vector<Shooter> shooterEnemy;
+	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(3);
+	std::vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
+	std::vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
+	std::vector<Enemy> rusherEnemy4 = SpawnEnemyRusher(8);
+	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
 
-
+	// BOSS
+	Boss boss;
+	const double Pi = 3.14159265359;
 	// Background
 
 	RectangleShape bg(Vector2f(1200, 900));
@@ -121,14 +128,13 @@ int main()
 	// Levels
 
 	int completion = 0;
-	bool level1 = true;
+	bool level1 = false;
 	bool level2 = false;
 	bool level3 = false;
 	bool level4 = false;
-	bool level5 = false;
+	bool levelBoss = false;
+	bool hasAppeared = false;
 
-	// Fenêtre ouverte par SFML
-	
 	while (window.isOpen())
 	{
 
@@ -190,6 +196,7 @@ int main()
 				canAttack = false;
 				cout << "Ammo : " << currentammo << " / " << "MaxAmmo : " << maxammo << endl;
 				ammostri = to_string(currentammo);
+				
 			}
 
 		}
@@ -436,16 +443,115 @@ int main()
 						cout << completion << "\n";
 						Ammo(window, currentammo, ammoBox, rusherEnemy);
 
-						if (completion == 10) {
+						if (completion >= 10) {
 
 							level4 = false;
 							level5 = true;
 							completion = 0;
+							levelBoss = true;
 
 
 						}
 
 					}
+				}
+				//mort du joueur par rapport au balles enemis
+				for (int i = 0; i < shooterBullets.size(); i++)
+				{
+					window.draw(shooterBullets[i].bulletShape);
+					shooterBullets[i].bulletShape.move(shooterBullets[i].playerPosition * shooterBullets[i].bulletSpeed);
+					if ((player.getPosition().x < shooterBullets[i].bulletShape.getPosition().x + shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().y < shooterBullets[i].bulletShape.getPosition().y + shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().x > shooterBullets[i].bulletShape.getPosition().x - shooterBullets[i].bulletShape.getRadius()) && (player.getPosition().y > shooterBullets[i].bulletShape.getPosition().y - shooterBullets[i].bulletShape.getRadius()))
+					{
+						isAlive = false;
+					}
+				}
+
+				//tir des shooter
+				for (int j = 0; j < shooterEnemy.size(); j++)
+				{
+					if (shooterEnemy[j].canShoot)
+					{
+						shooterEnemy[j].shooted = clock() / CLOCKS_PER_SEC;
+						shooterB1.bulletShape.setRadius(5.f);
+						shooterB1.bulletShape.setFillColor(Color::Blue);
+						shooterB1.bulletShape.setPosition(shooterEnemy[j].shooterShape.getPosition());
+						if (player.getPosition().x < shooterEnemy[j].shooterShape.getPosition().x)
+						{
+							shooterB1.playerPosition.x = (player.getPosition().x + 0.01f) - shooterEnemy[j].shooterShape.getPosition().x;
+						}
+						else
+						{
+
+							shooterB1.playerPosition.x = -(shooterEnemy[j].shooterShape.getPosition().x - (player.getPosition().x + 0.01f));
+						}
+						if (player.getPosition().y < shooterEnemy[j].shooterShape.getPosition().y)
+						{
+							shooterB1.playerPosition.y = (player.getPosition().y + 0.01f) - shooterEnemy[j].shooterShape.getPosition().y;
+						}
+						else
+						{
+							shooterB1.playerPosition.y = -(shooterEnemy[j].shooterShape.getPosition().y - (player.getPosition().y + 0.01f));
+						}
+						shooterBullets.push_back(shooterBullet(shooterB1));
+						shooterEnemy[j].canShoot = false;
+					}
+					else
+					{
+						shooterEnemy[j].shootMaxCoolDown = shooterEnemy[j].shooted + 2.f;
+						if (shooterEnemy[j].shootCoolDown < shooterEnemy[j].shootMaxCoolDown)
+						{
+							shooterEnemy[j].shootCoolDown = clock() / CLOCKS_PER_SEC;
+						}
+						else
+						{
+							shooterEnemy[j].canShoot = true;
+						}
+
+					}
+
+				}
+			}
+
+				//BOSS
+			if (levelBoss)
+			{
+				
+				if (!boss.isDead)
+				{
+					window.draw(boss.bossShape);
+					//cout << boss.bossBullets.size() << endl;
+					//cout << boss.bulletSpawnerPosition[0].getPosition().x << " " << boss.bulletSpawnerPosition[0].getPosition().y << endl;
+					for (int i = 0; i < sizeof(boss.bulletSpawnerPosition) / sizeof(*boss.bulletSpawnerPosition); i++)
+					{
+						boss.bulletSpawnerPosition[i].setRotation(boss.bulletSpawnerPosition[i].getRotation() + .7f);
+						window.draw(boss.bulletSpawnerPosition[i]);
+						//cout << boss.bulletSpawnerPosition[0].getRotation() << endl;
+					}
+					BossParameter(boss, bBoss);
+					for (int i = 0; i < boss.bossBullets.size(); i++)
+					{
+						window.draw(boss.bossBullets[i].bulletShape);
+						//boss.bossBullets[i].bulletShape.rotate(5.f);
+						boss.bossBullets[i].bulletShape.move(Vector2f(((cos(boss.bossBullets[i].bulletShape.getRotation()) / 2 *Pi) * 360 )* boss.bossBullets[i].bulletSpeed, (sin(boss.bossBullets[i].bulletShape.getRotation() / 2 * Pi) * 360 )* boss.bossBullets[i].bulletSpeed));
+						if (boss.bossBullets[i].bulletShape.getPosition().x < 0 || boss.bossBullets[i].bulletShape.getPosition().x > window.getSize().x || boss.bossBullets[i].bulletShape.getPosition().y < 0 || boss.bossBullets[i].bulletShape.getPosition().y > window.getSize().y)
+						{
+							boss.bossBullets.erase(boss.bossBullets.begin() + i);
+						}
+					}
+					//mort du joueur contre les balles du boss
+					for (int i = 0; i < boss.bossBullets.size(); i++)
+					{
+						if ((player.getPosition().x < boss.bossBullets[i].bulletShape.getPosition().x + boss.bossBullets[i].bulletShape.getRadius()) && (player.getPosition().y < boss.bossBullets[i].bulletShape.getPosition().y + boss.bossBullets[i].bulletShape.getRadius()) && (player.getPosition().x > boss.bossBullets[i].bulletShape.getPosition().x - boss.bossBullets[i].bulletShape.getRadius()) && (player.getPosition().y > boss.bossBullets[i].bulletShape.getPosition().y - boss.bossBullets[i].bulletShape.getRadius()))
+						{
+							isAlive = false;
+						}
+					}
+				}
+
+				
+				if (completion == 1) {
+					levelBoss = false;
+					completion = 0;
 				}
 			}
 
@@ -538,55 +644,29 @@ int main()
 					&& (player.getPosition().y < shooterBullets[i].bulletShape.getPosition().y + shooterBullets[i].bulletShape.getRadius()) 
 					&& (player.getPosition().x > shooterBullets[i].bulletShape.getPosition().x - shooterBullets[i].bulletShape.getRadius()) 
 					&& (player.getPosition().y > shooterBullets[i].bulletShape.getPosition().y - shooterBullets[i].bulletShape.getRadius()))
+
+				//BOSS
+				if ((bullets[i].shape.getPosition().x < boss.bossShape.getPosition().x + boss.bossShape.getRadius()) && (bullets[i].shape.getPosition().y < boss.bossShape.getPosition().y + boss.bossShape.getRadius()) && (bullets[i].shape.getPosition().x > boss.bossShape.getPosition().x - boss.bossShape.getRadius()) && (bullets[i].shape.getPosition().y > boss.bossShape.getPosition().y - boss.bossShape.getRadius()))
 				{
-					isAlive = false;
+					if(boss.damaged)
+					{
+						boss.damaged = false;
+					}
+					else
+					{
+						boss.BossDamaged(1);
+						boss.damaged = true;
+					}
+				}
+
+				//Suppression des projectiles en dehors de l'écran 
+				if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
+					bullets.erase(bullets.begin() + i);
+
 				}
 			}
-			//tir des shooter
-			for (int j = 0; j < shooterEnemy.size(); j++)
-			{
-				if (shooterEnemy[j].canShoot)
-				{
-					shooterEnemy[j].shooted = clock() / CLOCKS_PER_SEC;
-					shooterB1.bulletShape.setRadius(5.f);
-					shooterB1.bulletShape.setFillColor(Color::Blue);
-					shooterB1.bulletShape.setPosition(shooterEnemy[j].shooterShape.getPosition());
-					if (player.getPosition().x < shooterEnemy[j].shooterShape.getPosition().x)
-					{
-						shooterB1.playerPosition.x = (player.getPosition().x + 0.01f) - shooterEnemy[j].shooterShape.getPosition().x;
-					}
-					else
-					{
 
-						shooterB1.playerPosition.x = -(shooterEnemy[j].shooterShape.getPosition().x - (player.getPosition().x + 0.01f));
-					}
-					if (player.getPosition().y < shooterEnemy[j].shooterShape.getPosition().y)
-					{
-						shooterB1.playerPosition.y = (player.getPosition().y + 0.01f) - shooterEnemy[j].shooterShape.getPosition().y;
-					}
-					else
-					{
-						shooterB1.playerPosition.y = -(shooterEnemy[j].shooterShape.getPosition().y - (player.getPosition().y + 0.01f));
-					}
-					shooterBullets.push_back(shooterBullet(shooterB1));
-					shooterEnemy[j].canShoot = false;
-				}
-				else
-				{
-					shooterEnemy[j].shootMaxCoolDown = shooterEnemy[j].shooted + 2.f;
-					if (shooterEnemy[j].shootCoolDown < shooterEnemy[j].shootMaxCoolDown)
-					{
-						shooterEnemy[j].shootCoolDown = clock() / CLOCKS_PER_SEC;
-					}
-					else
-					{				
-						shooterEnemy[j].canShoot = true;
-					}
-
-				}
-
-			}
-	
+			
 			//Limitations de la bordure d'écran
 			if (player.getPosition().x < 0.f)
 				player.setPosition(0.f, player.getPosition().y);
@@ -615,7 +695,7 @@ int main()
 		}
 
 
-	}
+}
 
 	// Le spawner des ennemis coureurs
 
@@ -671,6 +751,64 @@ string getAssetsPath() {
 												// FONCTIONS
 
 // Fct pour l'ennemi rusher
+void BossParameter(Boss& boss, shooterBullet& bBoss)
+{
+	//si le boss n'est pas encore apparu, apparait
+	if (!boss.hasAppeared)
+	{
+		//Spawn le boss a un endroit avec des valeurs defini
+		int enemyStartPosX = rand() % 1100;
+		int enemyStartPosY = rand() % 900;
+		//preparametre du boss
+		boss.bossShape.setPosition(enemyStartPosX, enemyStartPosY);
+		boss.bossShape.setRadius(25.f);
+		boss.bossShape.setFillColor(Color::Yellow);
+		boss.bossShape.setOrigin(boss.bossShape.getRadius(), boss.bossShape.getRadius());
+		
+		//pre parametres des balles
+		bBoss.bulletShape.setFillColor(Color::Blue);
+		bBoss.bulletSpeed = 0.005f;
+		bBoss.bulletShape.setRadius(7.f);
+
+
+		//preparametre des spawners 
+		float spawnerRotation = 0.f;
+		for (int i = 0; i < sizeof(boss.bulletSpawnerPosition) / sizeof(*boss.bulletSpawnerPosition); i++)
+		{
+			boss.bulletSpawnerPosition[i].setPosition(boss.bossShape.getPosition().x, boss.bossShape.getPosition().y);
+			boss.bulletSpawnerPosition[i].setRadius(5.f);
+			boss.bulletSpawnerPosition[i].setRotation(spawnerRotation);
+			spawnerRotation += 45.f;
+		}
+
+		boss.hasAppeared = true;
+	}
+	if (!boss.hasShooted)
+	{
+		boss.bossBulletShooted = (float)clock() / CLOCKS_PER_SEC;
+		for (int i = 0; i < sizeof(boss.bulletSpawnerPosition) / sizeof(*boss.bulletSpawnerPosition); i++)
+		{
+			bBoss.bulletShape.setPosition(boss.bulletSpawnerPosition[i].getPosition().x, boss.bulletSpawnerPosition[i].getPosition().y);
+			bBoss.bulletShape.setRotation(boss.bulletSpawnerPosition[i].getRotation());
+			boss.bossBullets.push_back(bBoss);
+			//cout << boss.bulletSpawnerPosition[7].getRotation() << endl;
+			//cout << bBoss.bulletShape.getPosition().x << " " << bBoss.bulletShape.getPosition().y << endl;
+		}
+		boss.hasShooted = true;
+	}
+	else
+	{
+		boss.bossBulletCooldown = (float)clock() / CLOCKS_PER_SEC;
+		if (boss.bossBulletCooldown >= boss.bossBulletShooted + boss.speedSpawningBullet)
+		{
+			boss.hasShooted = false;
+		}
+	}
+	
+}
+
+
+
 void RusherParameters(Enemy& rusher, CircleShape& player)
 {
 	if (!rusher.isDead)
