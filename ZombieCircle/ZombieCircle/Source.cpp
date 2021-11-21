@@ -280,7 +280,6 @@ int main()
 					ammostri = to_string(currentammo);
 					completion += 1;
 					cout << completion << "\n";
-					Ammo(window, currentammo, ammoBox, rusherEnemy);					
 					int ammoIsSpawning = rand() % 100;
 					if (ammoIsSpawning < ammoSpawnPourcent)
 					{
@@ -333,7 +332,6 @@ int main()
 					ammostri = to_string(currentammo);
 					completion += 1;
 					cout << completion << "\n";
-					Ammo(window, currentammo, ammoBox, rusherEnemy);
 					int ammoIsSpawning = rand() % 100;
 					if (ammoIsSpawning < ammoSpawnPourcent)
 					{
@@ -389,7 +387,6 @@ int main()
 					ammostri = to_string(currentammo);
 					completion += 1;
 					cout << completion << "\n";
-					Ammo(window, currentammo, ammoBox, rusherEnemy);
 
 					if (completion >= 8) {
 
@@ -468,7 +465,6 @@ int main()
 						}
 						completion += 1;
 						cout << completion << "\n";
-						Ammo(window, currentammo, ammoBox, rusherEnemy);
 
 						if (completion >= 10) {
 
@@ -980,11 +976,6 @@ void Reload(int& currentammo, int& maxammo)
 //if(shooter.shooterShape.getPosition().x < player.getPosition().x + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y < player.getPosition().y + (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().x > player.getPosition().x - (player.getRadius() * 2)) && (shooter.shooterShape.getPosition().y > player.getPosition().y - (player.getRadius() * 2))
 
 // Fct des boites de munitions 
-void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> enemies) {
-
-	currentAmmo += 3;
-	window.draw(ammoBox);
-}
 void CreateAmmo(RenderWindow& window, int& currentAmmo, vector<Enemy>& enemies, vector<Ammo>& ammoBox) {
 
 	Ammo ammo;
