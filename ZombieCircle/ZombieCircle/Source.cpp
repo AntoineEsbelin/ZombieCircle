@@ -34,7 +34,7 @@ int main()
 	float xwindow = window.getSize().x;
 	float ywindow = window.getSize().y;
 
-
+	
 	// Player
 
 	CircleShape player;
@@ -85,9 +85,7 @@ int main()
 	maxammotext.setCharacterSize(25);
 	maxammotext.setPosition(1000.f, 10.f);
 
-	CircleShape ammoBox;
-	ammoBox.setFillColor(Color::Magenta);
-	ammoBox.setRadius(20.f);
+	
 
 	
 
@@ -134,6 +132,17 @@ int main()
 	bool level4 = false;
 	bool levelBoss = false;
 	bool hasAppeared = false;
+
+	//Ammo
+	Ammo ammo;
+	std::vector<Ammo> ammoBox;
+	int ammoSpawnPourcent = 25;
+	
+	/*ammoBox.push_back(ammo);*/
+	
+	CircleShape zebi;
+	zebi.setFillColor(Color::Red);
+	zebi.setRadius(20);
 
 	while (window.isOpen())
 	{
@@ -272,6 +281,11 @@ int main()
 					completion += 1;
 					cout << completion << "\n";
 					Ammo(window, currentammo, ammoBox, rusherEnemy);					
+					int ammoIsSpawning = rand() % 100;
+					if (ammoIsSpawning < ammoSpawnPourcent)
+					{
+						CreateAmmo(window, currentammo, rusherEnemy, ammoBox);
+					}
 
 				}
 			}
@@ -320,7 +334,11 @@ int main()
 					completion += 1;
 					cout << completion << "\n";
 					Ammo(window, currentammo, ammoBox, rusherEnemy);
-
+					int ammoIsSpawning = rand() % 100;
+					if (ammoIsSpawning < ammoSpawnPourcent)
+					{
+						CreateAmmo(window, currentammo, rusherEnemy2, ammoBox);
+					}
 				}
 			}
 
@@ -443,6 +461,11 @@ int main()
 					else
 					{
 						rusherEnemy4.erase(rusherEnemy4.begin() + i);
+						int ammoIsSpawning = rand() % 100;
+						if (ammoIsSpawning < ammoSpawnPourcent)
+						{
+							CreateAmmo(window, currentammo, rusherEnemy3, ammoBox);
+						}
 						completion += 1;
 						cout << completion << "\n";
 						Ammo(window, currentammo, ammoBox, rusherEnemy);
@@ -632,6 +655,25 @@ int main()
 					}
 				}
 
+				//AMMO
+				for (Ammo& amo : ammoBox)
+				{
+					if ((player.getPosition().x < amo.ammoShape.getPosition().x + amo.ammoShape.getSize().x)
+						&& (player.getPosition().y < amo.ammoShape.getPosition().y + amo.ammoShape.getSize().y)
+						&& (player.getPosition().x > amo.ammoShape.getPosition().x - amo.ammoShape.getSize().x)
+						&& (player.getPosition().y > amo.ammoShape.getPosition().y - amo.ammoShape.getSize().y))
+					{
+						amo.isPicked = true;
+						if (amo.isPicked == true)
+						{
+							int i = ammoBox.size() - 1;
+							maxammo += 5;
+							amo.isPicked = false;
+							ammoBox.erase(ammoBox.begin() + i);	
+						}
+					}
+				}
+
 				//BOSS
 				if ((bullets[i].shape.getPosition().x < boss.bossShape.getPosition().x + boss.bossShape.getRadius())
 					&& (bullets[i].shape.getPosition().y < boss.bossShape.getPosition().y + boss.bossShape.getRadius())
@@ -690,7 +732,10 @@ int main()
 			maxammotext.setString("Max ammo: " + maxammostri);
 			window.draw(maxammotext);
 			window.draw(currentammotext);
-
+			for (Ammo& amo : ammoBox) 
+			{
+				window.draw(amo.ammoShape);
+			}
 			window.display();
 
 			// Esc pour quitter le jeu 
@@ -939,4 +984,21 @@ void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<E
 
 	currentAmmo += 3;
 	window.draw(ammoBox);
+}
+void CreateAmmo(RenderWindow& window, int& currentAmmo, vector<Enemy>& enemies, vector<Ammo>& ammoBox) {
+
+	Ammo ammo;
+	ammoBox.push_back(ammo);
+	int i = ammoBox.size() - 1;
+	int j = enemies.size() - 1;
+
+	int ammoBoxPosX = enemies[j].enemyCircleShape.getPosition().x;
+	int ammoBoxPosY = enemies[j].enemyCircleShape.getPosition().y;
+
+	ammoBox[i].ammoShape.setSize(Vector2f(20, 15));
+	ammoBox[i].ammoShape.setFillColor(Color::Blue);
+	ammoBox[i].ammoShape.setPosition(ammoBoxPosX, ammoBoxPosY);	
+
+	cout << "aapparu" << endl;
+	return;
 }

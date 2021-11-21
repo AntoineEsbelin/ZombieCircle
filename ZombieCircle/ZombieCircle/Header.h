@@ -44,8 +44,8 @@ struct Ammo
 	RectangleShape ammoShape;
 	bool giveAmmo;
 	int ammoMount = 5;
-	int ammoisSpawning = rand() % 100;
-	int spawnPourcent = 100;
+	int ammoIsSpawning = rand() % 100;
+	int spawnPourcent = 33;
 };
 
 
@@ -113,4 +113,6 @@ void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBull
 void Reload(int& currentammo, int& maxammo);
 void Ammo(RenderWindow& window, int& currentAmmo, CircleShape& ammoBox, vector<Enemy> ennemies);
 void BossParameter(Boss& boss, shooterBullet& bBoss);
+void CreateAmmo(RenderWindow& window, int& currentAmmo, vector<Enemy>& enemies, vector<Ammo>& ammoBox);
+
 
