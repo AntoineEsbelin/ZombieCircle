@@ -77,6 +77,13 @@ struct shooterBullet
 	Vector2f playerPosition;
 };
 
+struct BossPillar
+{
+	RectangleShape pillarShape;
+	float pillarSpeed = .05f;
+	Vector2f playerTarget = Vector2f(100.f, 100.f);
+};
+
 class Boss {
 
 private:
@@ -86,13 +93,36 @@ public:
 	CircleShape bulletSpawnerPosition[8];
 	bool isDead = false;
 	bool hasAppeared = false;
-	vector<shooterBullet> bossBullets;
 	
+	//BOSS MOVEMENT
+	float coolDownBeforeNextMove = 0.f;
+	bool takenCooldown = false;
+	float coolDownNextMove = 0.f;
+	float nextMoveTime = 0.f;
+	Vector2f nextPosition = Vector2f(rand() % 1100, rand() % 700);
+	float bossSpeed = 2.f;
+	bool damaged = false;
+
+	//BOSS SWITCH BTW PATTERN 1 & 2
+	int randomPattern = 2 /*rand() % 2 + 1*/;
+	float timeBtwSwitch = 0.f;
+	float timeSwitch = 0.f;
+	float differenceBtwTime = 5.f;
+
+	//BOSS PATTERN 1
+	vector<shooterBullet> bossBullets;
 	float bossBulletCooldown;
 	float bossBulletShooted;
 	float speedSpawningBullet = .2f;
 	bool hasShooted = false;
-	bool damaged = false;
+
+	//BOSS PATTERN 2
+	vector<BossPillar> vectorPillar;
+	float bossPillarCooldown;
+	float bossPillarShooted;
+	float speedSpawningPillar = .5f;
+	bool pillarShooted = true;
+	float pillarSpeed = 0.008f;
 
 	void BossDamaged(int damage)
 	{
@@ -111,6 +141,6 @@ std::vector<Shooter> SpawnEnemyShooter(int number);
 void RusherParameters(Enemy& rusher, CircleShape& player);
 void ShooterParameters(Shooter& shooter, CircleShape& player, vector<shooterBullet>& shooterBullets);
 void Reload(int& currentammo, int& maxammo);
-void BossParameter(Boss& boss, shooterBullet& bBoss);
+void BossParameter(Boss& boss, shooterBullet& bBoss, CircleShape& player, BossPillar& bossPillar);
 void CreateAmmo(RenderWindow& window, int& currentAmmo, vector<Enemy>& enemies, vector<Ammo>& ammoBox);
 
