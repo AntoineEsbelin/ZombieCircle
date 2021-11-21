@@ -104,7 +104,7 @@ public:
 	bool damaged = false;
 
 	//BOSS SWITCH BTW PATTERN 1 & 2
-	int randomPattern = 2 /*rand() % 2 + 1*/;
+	int randomPattern = rand() % 2 + 1;
 	float timeBtwSwitch = 0.f;
 	float timeSwitch = 0.f;
 	float differenceBtwTime = 5.f;

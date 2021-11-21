@@ -108,7 +108,7 @@ int main()
 	std::vector<Enemy> rusherEnemy = SpawnEnemyRusher(4);
 	std::vector<Enemy> rusherEnemy2 = SpawnEnemyRusher(6);
 	std::vector<Enemy> rusherEnemy3 = SpawnEnemyRusher(8);
-	std::vector<Enemy> rusherEnemy4 = SpawnEnemyRusher(8);
+	std::vector<Enemy> rusherEnemy4 = SpawnEnemyRusher(10);
 	std::vector<Shooter> shooterEnemy = SpawnEnemyShooter(2);
 
 	// BOSS
@@ -126,11 +126,11 @@ int main()
 	// Levels
 
 	int completion = 0;
-	bool level1 = false;
+	bool level1 = true;
 	bool level2 = false;
 	bool level3 = false;
 	bool level4 = false;
-	bool levelBoss = true;
+	bool levelBoss = false;
 	bool hasAppeared = false;
 
 	//Ammo
