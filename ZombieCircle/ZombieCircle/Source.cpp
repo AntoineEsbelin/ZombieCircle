@@ -651,25 +651,6 @@ int main()
 					}
 				}
 
-				//AMMO
-				for (Ammo& amo : ammoBox)
-				{
-					if ((player.getPosition().x < amo.ammoShape.getPosition().x + amo.ammoShape.getSize().x)
-						&& (player.getPosition().y < amo.ammoShape.getPosition().y + amo.ammoShape.getSize().y)
-						&& (player.getPosition().x > amo.ammoShape.getPosition().x - amo.ammoShape.getSize().x)
-						&& (player.getPosition().y > amo.ammoShape.getPosition().y - amo.ammoShape.getSize().y))
-					{
-						amo.isPicked = true;
-						if (amo.isPicked == true)
-						{
-							int i = ammoBox.size() - 1;
-							maxammo += 5;
-							amo.isPicked = false;
-							ammoBox.erase(ammoBox.begin() + i);	
-						}
-					}
-				}
-
 				//BOSS
 				if ((bullets[i].shape.getPosition().x < boss.bossShape.getPosition().x + boss.bossShape.getRadius())
 					&& (bullets[i].shape.getPosition().y < boss.bossShape.getPosition().y + boss.bossShape.getRadius())
@@ -691,6 +672,25 @@ int main()
 				if (bullets[i].shape.getPosition().x < 0 || bullets[i].shape.getPosition().x > window.getSize().x || bullets[i].shape.getPosition().y < 0 || bullets[i].shape.getPosition().y > window.getSize().y) {
 					bullets.erase(bullets.begin() + i);
 
+				}
+			}
+
+			//AMMO
+			for (Ammo& amo : ammoBox)
+			{
+				if ((player.getPosition().x < amo.ammoShape.getPosition().x + amo.ammoShape.getSize().x)
+					&& (player.getPosition().y < amo.ammoShape.getPosition().y + amo.ammoShape.getSize().y)
+					&& (player.getPosition().x > amo.ammoShape.getPosition().x - amo.ammoShape.getSize().x)
+					&& (player.getPosition().y > amo.ammoShape.getPosition().y - amo.ammoShape.getSize().y))
+				{
+					amo.isPicked = true;
+					if (amo.isPicked == true)
+					{
+						int i = ammoBox.size() - 1;
+						maxammo += 5;
+						amo.isPicked = false;
+						ammoBox.erase(ammoBox.begin() + i);
+					}
 				}
 			}
 
